@@ -1,0 +1,36 @@
+## .NET build output
+bin/
+obj/
+out/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+.idea/
+
+## Test and coverage results
+TestResults/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+
+## Local configuration and secrets
+appsettings.Development.json
+appsettings.Local.json
+.env
+.env.*
+!.env.example
+
+## Containers and database volumes
+docker-data/
+sqlserver-data/
+
+## OS files
+.DS_Store
+Thumbs.db
+
