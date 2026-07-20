@@ -1,12 +1,17 @@
-﻿using EduApoyos.Application.Abstractions.Persistence;
+﻿using System.Text;
+using EduApoyos.Application.Abstractions.Authentication;
+using EduApoyos.Application.Abstractions.Persistence;
 using EduApoyos.Domain.Strategies;
+using EduApoyos.Infrastructure.Authentication;
 using EduApoyos.Infrastructure.Identity;
 using EduApoyos.Infrastructure.Persistence;
 using EduApoyos.Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EduApoyos.Infrastructure;
 
@@ -20,6 +25,34 @@ public static class DependencyInjection
             configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
                 "No se configuró la cadena de conexión DefaultConnection.");
+
+        var jwtSection = configuration.GetSection(
+            JwtSettings.SectionName);
+
+        var jwtSettings = jwtSection.Get<JwtSettings>()
+            ?? throw new InvalidOperationException(
+                "No se configuró la sección Jwt.");
+
+        if (string.IsNullOrWhiteSpace(jwtSettings.Key) ||
+            Encoding.UTF8.GetByteCount(jwtSettings.Key) < 32)
+        {
+            throw new InvalidOperationException(
+                "La clave JWT debe tener al menos 32 bytes.");
+        }
+
+        if (string.IsNullOrWhiteSpace(jwtSettings.Issuer) ||
+            string.IsNullOrWhiteSpace(jwtSettings.Audience) ||
+            jwtSettings.ExpirationMinutes <= 0)
+        {
+            throw new InvalidOperationException(
+                "La configuración JWT no es válida.");
+        }
+
+        services.Configure<JwtSettings>(jwtSection);
+
+        services.Configure<SeedAsesorSettings>(
+            configuration.GetSection(
+                SeedAsesorSettings.SectionName));
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
@@ -41,11 +74,54 @@ public static class DependencyInjection
                     options.Password.RequireNonAlphanumeric = true;
 
                     options.Lockout.MaxFailedAccessAttempts = 5;
+
                     options.Lockout.DefaultLockoutTimeSpan =
                         TimeSpan.FromMinutes(15);
                 })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+
+            options.DefaultChallengeScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+        })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(
+                                    jwtSettings.Key)),
+
+                        ClockSkew = TimeSpan.Zero
+                    };
+            });
+
+        services.AddAuthorization();
+
+        services.AddScoped<
+            IJwtTokenGenerator,
+            JwtTokenGenerator>();
+
+        services.AddScoped<
+            IAuthenticationService,
+            AuthenticationService>();
+
+        services.AddScoped<IdentityDataSeeder>();
 
         services.AddScoped<
             IEstudianteRepository,

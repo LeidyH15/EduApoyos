@@ -1,18 +1,29 @@
 using EduApoyos.Infrastructure;
+using EduApoyos.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Add services to the container.
-
+// Servicios de controladores.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger / OpenAPI.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Crear roles y asesor inicial.
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var seeder = scope.ServiceProvider
+        .GetRequiredService<IdentityDataSeeder>();
+
+    await seeder.InicializarAsync();
+}
+
+// Swagger en ambiente de desarrollo.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -21,6 +32,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
