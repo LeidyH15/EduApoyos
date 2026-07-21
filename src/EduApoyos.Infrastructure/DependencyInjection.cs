@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using EduApoyos.Application.Solicitudes;
+using EduApoyos.Infrastructure.Solicitudes;
+using Microsoft.Extensions.Logging;
 using EduApoyos.Application.Abstractions.Authentication;
 using EduApoyos.Application.Abstractions.Persistence;
 using EduApoyos.Application.Estudiantes;
@@ -151,6 +153,10 @@ public static class DependencyInjection
         services.AddScoped<
            IEstudianteService,
            EstudianteService>();
+
+        services.AddScoped<
+          ISolicitudApoyoService,
+          SolicitudApoyoService>();
 
         return services;
     }

@@ -1,3 +1,5 @@
+using EduApoyos.Api.Common.Authentication;
+using EduApoyos.Application.Abstractions.Authentication;
 using EduApoyos.Api.Common.Exceptions;
 using EduApoyos.Infrastructure;
 using EduApoyos.Infrastructure.Identity;
@@ -6,6 +8,12 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<
+    IUsuarioActualService,
+    UsuarioActualService>();
 
 builder.Services.AddControllers();
 

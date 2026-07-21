@@ -75,6 +75,12 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         return exception switch
         {
+            AccesoDenegadoException => (
+             StatusCodes.Status403Forbidden,
+             "Acceso denegado",
+             exception.Message,
+             "https://tools.ietf.org/html/rfc9110#section-15.5.4"),
+
             NoAutorizadoException => (
                 StatusCodes.Status401Unauthorized,
                 "No autorizado",
