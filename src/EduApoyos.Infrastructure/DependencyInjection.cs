@@ -1,8 +1,10 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.Logging;
 using EduApoyos.Application.Abstractions.Authentication;
 using EduApoyos.Application.Abstractions.Persistence;
+using EduApoyos.Application.Estudiantes;
 using EduApoyos.Domain.Strategies;
 using EduApoyos.Infrastructure.Authentication;
+using EduApoyos.Infrastructure.Estudiantes;
 using EduApoyos.Infrastructure.Identity;
 using EduApoyos.Infrastructure.Persistence;
 using EduApoyos.Infrastructure.Persistence.Repositories;
@@ -11,7 +13,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace EduApoyos.Infrastructure;
 
@@ -91,6 +95,7 @@ public static class DependencyInjection
         })
             .AddJwtBearer(options =>
             {
+                
                 options.TokenValidationParameters =
                     new TokenValidationParameters
                     {
@@ -142,6 +147,10 @@ public static class DependencyInjection
         services.AddScoped<
             IEstrategiaEstadoSolicitud,
             EstrategiaSolicitudEnRevision>();
+
+        services.AddScoped<
+           IEstudianteService,
+           EstudianteService>();
 
         return services;
     }
