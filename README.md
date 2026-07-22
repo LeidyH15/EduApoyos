@@ -2,6 +2,8 @@
 
 ## EduApoyos
 
+[![Backend CI](https://github.com/LeidyH15/EduApoyos/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/LeidyH15/EduApoyos/actions/workflows/backend-ci.yml)
+
 ### API para la gestión de solicitudes de apoyo económico estudiantil
 
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
@@ -445,6 +447,113 @@ Las migraciones generadas por EF Core se excluyen del cálculo porque no contien
 - Las mediciones de rendimiento deben ejecutarse en un ambiente equivalente al despliegue objetivo.
 
 ---
+
+## Propuesta de despliegue en Microsoft Azure
+
+> [!NOTE]
+> El proyecto no se encuentra desplegado en Azure. Esta sección documenta
+> los servicios que se utilizarían en un ambiente productivo y la
+> justificación de cada elección.
+
+### Arquitectura propuesta
+
+```mermaid
+flowchart LR
+    U[Usuario] --> F[Angular<br/>Static Web Apps]
+    F --> A[ASP.NET Core API<br/>App Service]
+    A --> D[(Azure SQL Database)]
+    A --> K[Azure Key Vault]
+    A -. Documentos futuros .-> B[Blob Storage]
+```
+
+### Servicios seleccionados
+
+| Servicio | Uso propuesto | Nivel sugerido | Justificación |
+|---|---|---|---|
+| **Azure Static Web Apps** | Hospedaje del frontend Angular. | Free para demostración; Standard para producción. | Está orientado a aplicaciones SPA, se integra con GitHub Actions, permite HTTPS y facilita las rutas propias de Angular. |
+| **Azure App Service** | Hospedaje de la API ASP.NET Core 8. | Linux Basic B1 para demostración o una carga inicial pequeña. | Permite publicar la API sin administrar servidores, habilitar HTTPS, configurar variables de entorno y escalar el servicio cuando aumente la demanda. |
+| **Azure SQL Database** | Base de datos relacional del sistema. | Basic para demostración; Standard S0 o superior para producción. | Es compatible con SQL Server y Entity Framework Core, proporciona respaldos administrados, alta disponibilidad y escalamiento según la carga. |
+| **Azure Key Vault** | Administración de secretos de producción. | Standard. | Evita guardar la cadena de conexión, la clave JWT y las credenciales iniciales dentro del código fuente o de los archivos versionados. |
+| **Azure Blob Storage** | Almacenamiento futuro de documentos o constancias persistentes. | StorageV2 con redundancia LRS para una carga inicial. | Es adecuado para archivos no estructurados. Actualmente la constancia se genera en memoria y se descarga directamente, por lo que este servicio no es obligatorio en la versión actual. |
+| **Application Insights** | Monitoreo de la API. | Basado en consumo. | Permitiría consultar errores, tiempos de respuesta, solicitudes y trazas para comprobar el requisito de rendimiento. |
+
+### Configuración propuesta de la API
+
+La API se publicaría en un App Service para Linux con:
+
+- Runtime de .NET 8.
+- HTTPS Only habilitado.
+- Entorno `Production`.
+- Health Check sobre un endpoint de disponibilidad.
+- CORS limitado al dominio del frontend.
+- Migraciones ejecutadas como una tarea controlada de despliegue.
+- Identidad administrada habilitada para acceder a Key Vault.
+- Registros y telemetría enviados a Application Insights.
+
+Las configuraciones sensibles se entregarían como referencias de
+Key Vault o variables de entorno:
+
+```text
+ConnectionStrings__DefaultConnection
+Jwt__Key
+Jwt__Issuer
+Jwt__Audience
+Jwt__ExpirationMinutes
+SeedAsesor__Email
+SeedAsesor__Password
+```
+
+Ninguno de estos valores de producción debe almacenarse en Git.
+
+### Configuración propuesta de Azure SQL Database
+
+Para una demostración académica se podría utilizar el nivel **Basic**,
+debido a su bajo volumen esperado. Para producción se recomienda comenzar
+con **Standard S0** y aumentar el nivel después de revisar:
+
+- Cantidad de solicitudes concurrentes.
+- Uso de CPU y almacenamiento.
+- Tiempos de respuesta.
+- Crecimiento de solicitudes e historial.
+- Necesidades de recuperación y continuidad.
+
+El acceso al servidor se restringiría mediante reglas de red y una cadena
+de conexión protegida en Key Vault.
+
+### Seguridad en Azure
+
+- Todos los accesos externos se realizarían mediante HTTPS.
+- Los secretos se administrarían en Azure Key Vault.
+- App Service utilizaría identidad administrada para consultar secretos.
+- Azure SQL Database no expondría credenciales en el repositorio.
+- Los roles `Asesor` y `Estudiante` continuarían validándose mediante JWT.
+- El estudiante solamente podría consultar sus propios recursos.
+- Los registros no incluirían contraseñas, tokens ni cadenas de conexión.
+
+### Integración y entrega continua
+
+El archivo `.github/workflows/backend-ci.yml` implementa el pipeline de
+GitHub Actions y ejecuta automáticamente:
+
+1. Obtención del repositorio.
+2. Configuración del SDK de .NET.
+3. Restauración de dependencias.
+4. Compilación en modo Release.
+5. Ejecución de pruebas unitarias y de integración.
+6. Publicación de la API.
+7. Generación del artefacto `eduapoyos-api`.
+
+En un despliegue real se agregaría una etapa posterior que publicaría ese
+artefacto en Azure App Service utilizando credenciales federadas mediante
+OpenID Connect, evitando almacenar contraseñas de publicación.
+
+### Referencias oficiales
+
+- [Planes de Azure App Service](https://learn.microsoft.com/azure/app-service/overview-hosting-plans)
+- [Azure SQL Database](https://learn.microsoft.com/azure/azure-sql/database/sql-database-paas-overview)
+- [Modelo DTU de Azure SQL Database](https://learn.microsoft.com/azure/azure-sql/database/service-tiers-dtu)
+- [Desplegar Angular en Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/deploy-angular)
+- [Azure Blob Storage](https://learn.microsoft.com/azure/storage/blobs/storage-blob-static-website)
 
 ## Autora
 
