@@ -444,7 +444,7 @@ Las migraciones generadas por EF Core se excluyen del cálculo porque no contien
 
 ## Autora
 
-Desarrollado con dedicación por:
+Desarrollado por:
 
 ### **LEIDY STEPHANIA HERNÁNDEZ VARÓN**
 
