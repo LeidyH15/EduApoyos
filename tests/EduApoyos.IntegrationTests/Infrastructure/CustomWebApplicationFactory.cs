@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace EduApoyos.IntegrationTests.Infrastructure;
 
@@ -89,9 +90,14 @@ public class CustomWebApplicationFactory
             services.RemoveAll<ApplicationDbContext>();
 
             services.AddDbContext<ApplicationDbContext>(
-                options =>
-                    options.UseInMemoryDatabase(
-                        _databaseName));
+    options =>
+        options
+            .UseInMemoryDatabase(
+                _databaseName)
+            .ConfigureWarnings(warnings =>
+                warnings.Ignore(
+                    InMemoryEventId
+                        .TransactionIgnoredWarning)));
 
             services.Configure<JwtSettings>(
                 options =>

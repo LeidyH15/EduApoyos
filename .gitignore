@@ -13,7 +13,9 @@ out/
 .idea/
 
 ## Test and coverage results
+**/TestResults/
 TestResults/
+CoverageReport/
 coverage/
 coverage.*
 *.coverage
