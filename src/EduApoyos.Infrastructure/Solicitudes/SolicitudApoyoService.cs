@@ -1,4 +1,5 @@
-﻿using EduApoyos.Application.Abstractions.Persistence;
+﻿using EduApoyos.Application.Solicitudes.Constancias;
+using EduApoyos.Application.Abstractions.Persistence;
 using EduApoyos.Application.Common.Exceptions;
 using EduApoyos.Application.Common.Models;
 using EduApoyos.Application.Solicitudes;
@@ -26,18 +27,23 @@ public class SolicitudApoyoService : ISolicitudApoyoService
     private readonly IReadOnlyCollection<IEstrategiaEstadoSolicitud>
         _estrategias;
 
+    private readonly IConstanciaSolicitudFactory
+    _constanciaFactory;
+
     public SolicitudApoyoService(
-        ISolicitudApoyoRepository solicitudRepository,
-        IEstudianteRepository estudianteRepository,
-        IUnidadTrabajo unidadTrabajo,
-        ApplicationDbContext context,
-        IEnumerable<IEstrategiaEstadoSolicitud> estrategias)
+    ISolicitudApoyoRepository solicitudRepository,
+    IEstudianteRepository estudianteRepository,
+    IUnidadTrabajo unidadTrabajo,
+    ApplicationDbContext context,
+    IEnumerable<IEstrategiaEstadoSolicitud> estrategias,
+    IConstanciaSolicitudFactory constanciaFactory)
     {
         _solicitudRepository = solicitudRepository;
         _estudianteRepository = estudianteRepository;
         _unidadTrabajo = unidadTrabajo;
         _context = context;
         _estrategias = estrategias.ToList();
+        _constanciaFactory = constanciaFactory;
     }
 
     public async Task<ResultadoPaginado<SolicitudResponse>>
@@ -100,6 +106,24 @@ public class SolicitudApoyoService : ISolicitudApoyoService
             solicitud,
             solicitud.Estudiante,
             cancellationToken);
+    }
+
+    public async Task<ConstanciaSolicitudArchivo>
+    GenerarConstanciaAsync(
+        Guid solicitudId,
+        Guid usuarioActualId,
+        bool esAsesor,
+        CancellationToken cancellationToken = default)
+    {
+        var solicitud =
+            await ObtenerPorIdAsync(
+                solicitudId,
+                usuarioActualId,
+                esAsesor,
+                cancellationToken);
+
+        return _constanciaFactory.Crear(
+            solicitud);
     }
 
     public async Task<SolicitudResponse> CrearAsync(

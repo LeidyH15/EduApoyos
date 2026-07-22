@@ -205,4 +205,39 @@ public class SolicitudesController : ControllerBase
 
         return Ok(solicitud);
     }
+
+    /// <summary>
+    /// Descarga una constancia de la solicitud en formato de texto
+    /// El estudiante solo puede descargar constancias propias
+    /// </summary>
+    [HttpGet("{id:guid}/constancia")]
+    [Authorize(Roles = "Asesor,Estudiante")]
+    [ProducesResponseType(
+        typeof(FileContentResult),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(ProblemDetails),
+        StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(
+        typeof(ProblemDetails),
+        StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(
+        typeof(ProblemDetails),
+        StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DescargarConstancia(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var constancia =
+            await _solicitudService.GenerarConstanciaAsync(
+                id,
+                _usuarioActual.UsuarioId,
+                _usuarioActual.EsAsesor,
+                cancellationToken);
+
+        return File(
+            constancia.Contenido,
+            constancia.TipoContenido,
+            constancia.NombreArchivo);
+    }
 }

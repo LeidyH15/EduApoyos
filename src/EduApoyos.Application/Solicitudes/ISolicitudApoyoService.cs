@@ -1,4 +1,5 @@
-﻿using EduApoyos.Application.Common.Models;
+﻿using EduApoyos.Application.Solicitudes.Constancias;
+using EduApoyos.Application.Common.Models;
 
 namespace EduApoyos.Application.Solicitudes;
 
@@ -41,4 +42,10 @@ public interface ISolicitudApoyoService
             int pagina,
             int tamanoPagina,
             CancellationToken cancellationToken = default);
+
+    Task<ConstanciaSolicitudArchivo> GenerarConstanciaAsync(
+    Guid solicitudId,
+    Guid usuarioActualId,
+    bool esAsesor,
+    CancellationToken cancellationToken = default);
 }

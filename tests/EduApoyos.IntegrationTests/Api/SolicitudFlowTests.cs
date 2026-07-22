@@ -28,9 +28,11 @@ public class SolicitudFlowTests
 
         var registro = new
         {
-            nombreCompleto = "Estudiante Integración",
+            nombreCompleto =
+                "Estudiante Integración",
             email = emailEstudiante,
-            password = "Estudiante_Test2026!",
+            password =
+                "Estudiante_Test2026!",
             numeroDocumento =
                 $"T-{identificador[..18]}",
             tipoDocumento = 1,
@@ -45,8 +47,8 @@ public class SolicitudFlowTests
                 registro);
 
         var errorRegistro =
-    await registroResponse.Content
-        .ReadAsStringAsync();
+            await registroResponse.Content
+                .ReadAsStringAsync();
 
         Assert.True(
             registroResponse.IsSuccessStatusCode,
@@ -123,6 +125,83 @@ public class SolicitudFlowTests
                 .GetProperty("totalElementos")
                 .GetInt32());
 
+        using var constanciaRequest =
+            CrearRequestAutorizado(
+                HttpMethod.Get,
+                $"/api/solicitudes/{solicitudId}/constancia",
+                tokenEstudiante);
+
+        var constanciaResponse =
+            await _client.SendAsync(
+                constanciaRequest);
+
+        Assert.Equal(
+            HttpStatusCode.OK,
+            constanciaResponse.StatusCode);
+
+        Assert.Equal(
+            "text/plain",
+            constanciaResponse
+                .Content
+                .Headers
+                .ContentType?
+                .MediaType);
+
+        Assert.Equal(
+            "utf-8",
+            constanciaResponse
+                .Content
+                .Headers
+                .ContentType?
+                .CharSet);
+
+        Assert.Equal(
+            "attachment",
+            constanciaResponse
+                .Content
+                .Headers
+                .ContentDisposition?
+                .DispositionType);
+
+        var nombreArchivo =
+            constanciaResponse
+                .Content
+                .Headers
+                .ContentDisposition?
+                .FileNameStar
+            ?? constanciaResponse
+                .Content
+                .Headers
+                .ContentDisposition?
+                .FileName;
+
+        Assert.NotNull(nombreArchivo);
+
+        Assert.Contains(
+            solicitudId.ToString(),
+            nombreArchivo!,
+            StringComparison.OrdinalIgnoreCase);
+
+        var contenidoConstancia =
+            await constanciaResponse.Content
+                .ReadAsStringAsync();
+
+        Assert.Contains(
+            "CONSTANCIA DE SOLICITUD DE APOYO ECONÓMICO",
+            contenidoConstancia);
+
+        Assert.Contains(
+            solicitudId.ToString(),
+            contenidoConstancia);
+
+        Assert.Contains(
+            "Estudiante Integración",
+            contenidoConstancia);
+
+        Assert.Contains(
+            "Solicitud de beca creada desde una prueba de integración.",
+            contenidoConstancia);
+
         var tokenAsesor =
             await LoginAsesorAsync();
 
@@ -177,6 +256,125 @@ public class SolicitudFlowTests
             cambioJson
                 .GetProperty("historial")
                 .GetArrayLength());
+    }
+
+    [Fact]
+    public async Task ConstanciaAjena_DevuelveProhibido()
+    {
+        var tokenPropietario =
+            await RegistrarEstudianteAsync(
+                "Estudiante Propietario");
+
+        var crearSolicitud = new
+        {
+            tipoApoyo = 1,
+            montoSolicitado = 1200000m,
+            descripcion =
+                "Solicitud perteneciente al primer estudiante."
+        };
+
+        using var crearRequest =
+            CrearRequestAutorizado(
+                HttpMethod.Post,
+                "/api/solicitudes",
+                tokenPropietario,
+                crearSolicitud);
+
+        var crearResponse =
+            await _client.SendAsync(
+                crearRequest);
+
+        Assert.Equal(
+            HttpStatusCode.Created,
+            crearResponse.StatusCode);
+
+        var solicitudJson =
+            await LeerJsonAsync(
+                crearResponse);
+
+        var solicitudId =
+            solicitudJson
+                .GetProperty("id")
+                .GetGuid();
+
+        var tokenOtroEstudiante =
+            await RegistrarEstudianteAsync(
+                "Estudiante Sin Acceso");
+
+        using var constanciaRequest =
+            CrearRequestAutorizado(
+                HttpMethod.Get,
+                $"/api/solicitudes/{solicitudId}/constancia",
+                tokenOtroEstudiante);
+
+        var constanciaResponse =
+            await _client.SendAsync(
+                constanciaRequest);
+
+        Assert.Equal(
+            HttpStatusCode.Forbidden,
+            constanciaResponse.StatusCode);
+
+        Assert.Equal(
+            "application/problem+json",
+            constanciaResponse
+                .Content
+                .Headers
+                .ContentType?
+                .MediaType);
+
+        var errorJson =
+            await LeerJsonAsync(
+                constanciaResponse);
+
+        Assert.Equal(
+            403,
+            errorJson
+                .GetProperty("status")
+                .GetInt32());
+
+        Assert.True(
+            errorJson.TryGetProperty(
+                "traceId",
+                out _));
+    }
+
+    private async Task<string> RegistrarEstudianteAsync(
+    string nombreCompleto)
+    {
+        var identificador =
+            Guid.NewGuid().ToString("N");
+
+        var registro = new
+        {
+            nombreCompleto,
+            email =
+                $"estudiante.{identificador}@tests.local",
+            password =
+                "Estudiante_Test2026!",
+            numeroDocumento =
+                $"T-{identificador[..18]}",
+            tipoDocumento = 1,
+            programaAcademico =
+                "Ingeniería de Sistemas",
+            semestre = 4
+        };
+
+        var response =
+            await _client.PostAsJsonAsync(
+                "/api/auth/register",
+                registro);
+
+        var contenido =
+            await response.Content
+                .ReadAsStringAsync();
+
+        Assert.True(
+            response.IsSuccessStatusCode,
+            $"Falló el registro del estudiante: {contenido}");
+
+        return await ObtenerTokenAsync(
+            response);
     }
 
     private async Task<string> LoginAsesorAsync()
