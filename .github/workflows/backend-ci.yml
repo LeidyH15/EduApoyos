@@ -1,0 +1,62 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-publish:
+    name: Build, Test and Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v7
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Mostrar versión de .NET
+        run: dotnet --version
+
+      - name: Restaurar dependencias
+        run: dotnet restore EduApoyos.sln
+
+      - name: Compilar en Release
+        run: >
+          dotnet build EduApoyos.sln
+          --configuration Release
+          --no-restore
+
+      - name: Ejecutar pruebas
+        run: >
+          dotnet test EduApoyos.sln
+          --configuration Release
+          --no-build
+          --settings coverlet.runsettings
+          --results-directory TestResults
+
+      - name: Publicar API
+        run: >
+          dotnet publish
+          src/EduApoyos.Api/EduApoyos.Api.csproj
+          --configuration Release
+          --no-restore
+          --output artifacts/api
+
+      - name: Cargar artefacto de la API
+        uses: actions/upload-artifact@v7
+        with:
+          name: eduapoyos-api
+          path: artifacts/api
+          if-no-files-found: error
+          retention-days: 7
