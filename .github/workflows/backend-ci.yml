@@ -25,7 +25,7 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Mostrar versión de .NET
+      - name: Mostrar version de .NET
         run: dotnet --version
 
       - name: Restaurar dependencias
@@ -38,6 +38,11 @@ jobs:
           --no-restore
 
       - name: Ejecutar pruebas
+        env:
+          Jwt__Key: IntegrationTests_CI_Jwt_Key_2026_Segura_123456789
+          Jwt__Issuer: EduApoyos.Api.Tests
+          Jwt__Audience: EduApoyos.Client.Tests
+          Jwt__ExpirationMinutes: 60
         run: >
           dotnet test EduApoyos.sln
           --configuration Release
