@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using EduApoyos.IntegrationTests.Infrastructure;
 using System.Net.Http.Headers;
+using System.Diagnostics;
 
 namespace EduApoyos.IntegrationTests.Api;
 
@@ -187,6 +188,63 @@ public class ApiSmokeTests
             raiz.TryGetProperty(
                 "totalPaginas",
                 out _));
+    }
+
+    [Fact]
+    public async Task ListadoEstudiantes_RespondeAntesDe800Ms()
+    {
+        var token =
+            await ObtenerTokenAsesorAsync();
+
+        using var calentamientoRequest =
+            CrearRequestListado(
+                token);
+
+        var calentamientoResponse =
+            await _client.SendAsync(
+                calentamientoRequest);
+
+        calentamientoResponse
+            .EnsureSuccessStatusCode();
+
+        using var medicionRequest =
+            CrearRequestListado(
+                token);
+
+        var cronometro =
+            Stopwatch.StartNew();
+
+        var response =
+            await _client.SendAsync(
+                medicionRequest);
+
+        cronometro.Stop();
+
+        Assert.Equal(
+            HttpStatusCode.OK,
+            response.StatusCode);
+
+        Assert.True(
+            cronometro.ElapsedMilliseconds < 800,
+            $"La consulta tardó " +
+            $"{cronometro.ElapsedMilliseconds} ms. " +
+            "El máximo permitido es 800 ms.");
+    }
+
+    private static HttpRequestMessage CrearRequestListado(
+    string token)
+    {
+        var request =
+            new HttpRequestMessage(
+                HttpMethod.Get,
+                "/api/estudiantes?pagina=1&tamanoPagina=10");
+
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue(
+                "Bearer",
+                token);
+
+        return request;
     }
 
     private async Task<string> ObtenerTokenAsesorAsync()

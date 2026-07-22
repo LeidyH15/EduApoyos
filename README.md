@@ -8,8 +8,8 @@
 ![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-Web_API-6C3483?style=for-the-badge&logo=dotnet&logoColor=white)
 ![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-24_aprobadas-2EA44F?style=for-the-badge)
-![Coverage](https://img.shields.io/badge/Cobertura-%3E_80%25-2EA44F?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-26_aprobadas-2EA44F?style=for-the-badge)
+![Coverage](https://img.shields.io/badge/Cobertura-84%25-2EA44F?style=for-the-badge)
 
 <br>
 
@@ -388,6 +388,8 @@ La solución contiene pruebas unitarias y de integración para:
 - Respuestas ProblemDetails.
 - Descarga de constancias.
 - Restricción de acceso a solicitudes ajenas.
+- Tiempo de respuesta inferior a 800 ms para una consulta normal después del calentamiento.
+- Uso de Moq para aislar dependencias en pruebas unitarias.
 
 Ejecute todas las pruebas:
 
@@ -398,9 +400,11 @@ dotnet test EduApoyos.sln
 Estado actual:
 
 ```text
-24 pruebas aprobadas
+26 pruebas aprobadas
 0 pruebas fallidas
-Cobertura de líneas superior al 80%
+Cobertura de líneas: 84%
+Cobertura de métodos: 93.9%
+Cobertura de ramas: 55.7%
 ```
 
 ### Generar el reporte de cobertura
