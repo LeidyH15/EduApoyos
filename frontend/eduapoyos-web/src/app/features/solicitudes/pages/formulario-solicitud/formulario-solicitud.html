@@ -1,11 +1,6 @@
 <section class="form-page">
   <header class="page-header">
-    <button
-      mat-button
-      type="button"
-      class="back-button"
-      (click)="cancelar()"
-    >
+    <button mat-button type="button" class="back-button" (click)="cancelar()">
       <mat-icon>arrow_back</mat-icon>
       Volver
     </button>
@@ -39,99 +34,86 @@
       </mat-card-header>
 
       <mat-card-content>
-        <form
-          [formGroup]="formulario"
-          (ngSubmit)="crearSolicitud()"
-        >
+        <form [formGroup]="formulario" (ngSubmit)="crearSolicitud()">
           @if (esAsesor) {
-            <section class="form-section">
-              <div class="section-heading">
-                <span class="step-number">1</span>
+          <section class="form-section">
+            <div class="section-heading">
+              <span class="step-number">1</span>
 
-                <div>
-                  <h2>Estudiante</h2>
+              <div>
+                <h2>Estudiante</h2>
 
-                  <p>
-                    Selecciona el estudiante para quien
-                    se registrará la solicitud.
-                  </p>
-                </div>
+                <p>
+                  Selecciona el estudiante para quien
+                  se registrará la solicitud.
+                </p>
+              </div>
+            </div>
+
+            @if (cargandoEstudiantes()) {
+            <div class="inline-loading">
+              <mat-spinner diameter="24"></mat-spinner>
+              <span>Cargando estudiantes...</span>
+            </div>
+            } @else if (mensajeErrorEstudiantes()) {
+            <div class="students-error">
+              <mat-icon>warning</mat-icon>
+
+              <div>
+                <strong>
+                  No fue posible cargar los estudiantes
+                </strong>
+
+                <p>
+                  {{ mensajeErrorEstudiantes() }}
+                </p>
               </div>
 
-              @if (cargandoEstudiantes()) {
-                <div class="inline-loading">
-                  <mat-spinner diameter="24"></mat-spinner>
-                  <span>Cargando estudiantes...</span>
-                </div>
-              } @else if (mensajeErrorEstudiantes()) {
-                <div class="students-error">
-                  <mat-icon>warning</mat-icon>
+              <button mat-stroked-button type="button" (click)="cargarEstudiantes()">
+                Reintentar
+              </button>
+            </div>
+            } @else {
+            <mat-form-field appearance="outline">
+              <mat-label>Estudiante</mat-label>
 
-                  <div>
-                    <strong>
-                      No fue posible cargar los estudiantes
-                    </strong>
+              <mat-select formControlName="estudianteId">
+                @for (
+                estudiante of estudiantes();
+                track estudiante.id
+                ) {
+                <mat-option [value]="estudiante.id">
+                  <span class="student-option">
+                    {{ estudiante.nombreCompleto }}
+                    ·
+                    {{ estudiante.numeroDocumento }}
+                  </span>
+                </mat-option>
+                }
+              </mat-select>
 
-                    <p>
-                      {{ mensajeErrorEstudiantes() }}
-                    </p>
-                  </div>
+              <mat-icon matPrefix>
+                person_search
+              </mat-icon>
 
-                  <button
-                    mat-stroked-button
-                    type="button"
-                    (click)="cargarEstudiantes()"
-                  >
-                    Reintentar
-                  </button>
-                </div>
-              } @else {
-                <mat-form-field appearance="outline">
-                  <mat-label>Estudiante</mat-label>
+              <mat-hint>
+                {{
+                estudiantes().length
+                }}
+                estudiantes disponibles
+              </mat-hint>
 
-                  <mat-select
-                    formControlName="estudianteId"
-                  >
-                    @for (
-                      estudiante of estudiantes();
-                      track estudiante.id
-                    ) {
-                      <mat-option
-                        [value]="estudiante.id"
-                      >
-                        <span class="student-option">
-                          {{ estudiante.nombreCompleto }}
-                          ·
-                          {{ estudiante.numeroDocumento }}
-                        </span>
-                      </mat-option>
-                    }
-                  </mat-select>
-
-                  <mat-icon matPrefix>
-                    person_search
-                  </mat-icon>
-
-                  <mat-hint>
-                    {{
-                      estudiantes().length
-                    }}
-                    estudiantes disponibles
-                  </mat-hint>
-
-                  @if (
-                    formulario.controls
-                      .estudianteId.touched &&
-                    formulario.controls
-                      .estudianteId.hasError('required')
-                  ) {
-                    <mat-error>
-                      Selecciona un estudiante.
-                    </mat-error>
-                  }
-                </mat-form-field>
+              @if (
+              formulario.controls.estudianteId.touched &&
+              formulario.controls.estudianteId.hasError('required')
+              ) {
+              <mat-error>
+                Selecciona un estudiante.
+              </mat-error>
               }
-            </section>
+            </mat-form-field>
+            }
+          </section>
           }
 
           <section class="form-section">
@@ -154,21 +136,15 @@
               <mat-label>Tipo de apoyo</mat-label>
 
               <mat-select formControlName="tipoApoyo">
-                <mat-option
-                  [value]="TipoApoyo.Beca"
-                >
+                <mat-option [value]="TipoApoyo.Beca">
                   Beca
                 </mat-option>
 
-                <mat-option
-                  [value]="TipoApoyo.Credito"
-                >
+                <mat-option [value]="TipoApoyo.Credito">
                   Crédito educativo
                 </mat-option>
 
-                <mat-option
-                  [value]="TipoApoyo.Subsidio"
-                >
+                <mat-option [value]="TipoApoyo.Subsidio">
                   Subsidio
                 </mat-option>
               </mat-select>
@@ -178,53 +154,53 @@
               </mat-icon>
 
               @if (
-                formulario.controls
-                  .tipoApoyo.touched &&
-                formulario.controls
-                  .tipoApoyo.hasError('required')
+              formulario.controls
+              .tipoApoyo.touched &&
+              formulario.controls
+              .tipoApoyo.hasError('required')
               ) {
-                <mat-error>
-                  Selecciona el tipo de apoyo.
-                </mat-error>
+              <mat-error>
+                Selecciona el tipo de apoyo.
+              </mat-error>
               }
             </mat-form-field>
 
             @if (
-              formulario.controls.tipoApoyo.value;
-              as tipoSeleccionado
+            formulario.controls.tipoApoyo.value;
+            as tipoSeleccionado
             ) {
-              <div class="support-selection">
-                <span class="support-icon">
-                  <mat-icon>
-                    {{
-                      tipoSeleccionado === TipoApoyo.Beca
-                        ? 'school'
-                        : tipoSeleccionado ===
-                            TipoApoyo.Credito
-                          ? 'account_balance'
-                          : 'savings'
-                    }}
-                  </mat-icon>
-                </span>
+            <div class="support-selection">
+              <span class="support-icon">
+                <mat-icon>
+                  {{
+                  tipoSeleccionado === TipoApoyo.Beca
+                  ? 'school'
+                  : tipoSeleccionado ===
+                  TipoApoyo.Credito
+                  ? 'account_balance'
+                  : 'savings'
+                  }}
+                </mat-icon>
+              </span>
 
-                <div>
-                  <strong>
-                    {{
-                      obtenerNombreTipoApoyo(
-                        tipoSeleccionado
-                      )
-                    }}
-                  </strong>
+              <div>
+                <strong>
+                  {{
+                  obtenerNombreTipoApoyo(
+                  tipoSeleccionado
+                  )
+                  }}
+                </strong>
 
-                  <p>
-                    {{
-                      obtenerDescripcionTipoApoyo(
-                        tipoSeleccionado
-                      )
-                    }}
-                  </p>
-                </div>
+                <p>
+                  {{
+                  obtenerDescripcionTipoApoyo(
+                  tipoSeleccionado
+                  )
+                  }}
+                </p>
               </div>
+            </div>
             }
           </section>
 
@@ -249,15 +225,8 @@
 
               <span matTextPrefix>$&nbsp;</span>
 
-              <input
-                matInput
-                type="number"
-                min="1"
-                max="999999999"
-                step="1000"
-                formControlName="montoSolicitado"
-                placeholder="Ejemplo: 1500000"
-              />
+              <input matInput type="number" min="1" max="999999999" step="1000" formControlName="montoSolicitado"
+                placeholder="Ejemplo: 1500000" />
 
               <mat-icon matSuffix>
                 payments
@@ -268,36 +237,36 @@
               </mat-hint>
 
               @if (
-                formulario.controls
-                  .montoSolicitado.touched &&
-                formulario.controls
-                  .montoSolicitado.hasError('required')
+              formulario.controls
+              .montoSolicitado.touched &&
+              formulario.controls
+              .montoSolicitado.hasError('required')
               ) {
-                <mat-error>
-                  El monto es obligatorio.
-                </mat-error>
+              <mat-error>
+                El monto es obligatorio.
+              </mat-error>
               }
 
               @if (
-                formulario.controls
-                  .montoSolicitado.touched &&
-                formulario.controls
-                  .montoSolicitado.hasError('min')
+              formulario.controls
+              .montoSolicitado.touched &&
+              formulario.controls
+              .montoSolicitado.hasError('min')
               ) {
-                <mat-error>
-                  El monto debe ser mayor que cero.
-                </mat-error>
+              <mat-error>
+                El monto debe ser mayor que cero.
+              </mat-error>
               }
 
               @if (
-                formulario.controls
-                  .montoSolicitado.touched &&
-                formulario.controls
-                  .montoSolicitado.hasError('max')
+              formulario.controls
+              .montoSolicitado.touched &&
+              formulario.controls
+              .montoSolicitado.hasError('max')
               ) {
-                <mat-error>
-                  El monto supera el máximo permitido.
-                </mat-error>
+              <mat-error>
+                El monto supera el máximo permitido.
+              </mat-error>
               }
             </mat-form-field>
 
@@ -306,13 +275,8 @@
                 Descripción de la solicitud
               </mat-label>
 
-              <textarea
-                matInput
-                formControlName="descripcion"
-                rows="6"
-                maxlength="1000"
-                placeholder="Explica para qué necesitas el apoyo y cómo será utilizado"
-              ></textarea>
+              <textarea matInput formControlName="descripcion" rows="6" maxlength="1000"
+                placeholder="Explica para qué necesitas el apoyo y cómo será utilizado"></textarea>
 
               <mat-hint>
                 Incluye información clara para facilitar
@@ -321,69 +285,57 @@
 
               <mat-hint align="end">
                 {{
-                  formulario.controls
-                    .descripcion.value.length
+                formulario.controls
+                .descripcion.value.length
                 }}/1000
               </mat-hint>
 
               @if (
-                formulario.controls
-                  .descripcion.touched &&
-                formulario.controls
-                  .descripcion.hasError('required')
+              formulario.controls
+              .descripcion.touched &&
+              formulario.controls
+              .descripcion.hasError('required')
               ) {
-                <mat-error>
-                  La descripción es obligatoria.
-                </mat-error>
+              <mat-error>
+                La descripción es obligatoria.
+              </mat-error>
               }
 
               @if (
-                formulario.controls
-                  .descripcion.touched &&
-                formulario.controls
-                  .descripcion.hasError('minlength')
+              formulario.controls
+              .descripcion.touched &&
+              formulario.controls
+              .descripcion.hasError('minlength')
               ) {
-                <mat-error>
-                  Escribe al menos 10 caracteres.
-                </mat-error>
+              <mat-error>
+                Escribe al menos 10 caracteres.
+              </mat-error>
               }
             </mat-form-field>
           </section>
 
           <div class="form-actions">
-            <button
-              mat-stroked-button
-              type="button"
-              [disabled]="guardando()"
-              (click)="cancelar()"
-            >
+            <button mat-stroked-button type="button" [disabled]="guardando()" (click)="cancelar()">
               Cancelar
             </button>
 
-            <button
-              mat-flat-button
-              color="primary"
-              type="submit"
-              [disabled]="
+            <button mat-flat-button color="primary" type="submit" [disabled]="
                 formulario.invalid ||
                 guardando() ||
                 (esAsesor &&
                   cargandoEstudiantes())
-              "
-            >
+              ">
               @if (guardando()) {
-                <mat-spinner
-                  diameter="20"
-                ></mat-spinner>
+              <mat-spinner diameter="20"></mat-spinner>
               } @else {
-                <mat-icon>send</mat-icon>
+              <mat-icon>send</mat-icon>
               }
 
               <span>
                 {{
-                  guardando()
-                    ? 'Creando solicitud...'
-                    : 'Crear solicitud'
+                guardando()
+                ? 'Creando solicitud...'
+                : 'Crear solicitud'
                 }}
               </span>
             </button>
@@ -448,7 +400,6 @@
             <div>
               <strong>Resultado</strong>
               <small>Aprobada o rechazada</small>
->
             </div>
           </div>
         </mat-card-content>
