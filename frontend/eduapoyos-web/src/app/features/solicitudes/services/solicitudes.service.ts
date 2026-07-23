@@ -2,8 +2,13 @@ import {
   HttpClient,
   HttpParams
 } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import {
+  Injectable,
+  inject
+} from '@angular/core';
+import {
+  Observable
+} from 'rxjs';
 
 import {
   environment
@@ -13,6 +18,7 @@ import {
 } from '../../../core/models/resultado-paginado';
 import {
   CambiarEstadoSolicitudRequest,
+  CrearSolicitudRequest,
   Solicitud,
   SolicitudFiltro
 } from '../models/solicitud.model';
@@ -21,7 +27,8 @@ import {
   providedIn: 'root'
 })
 export class SolicitudesService {
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
 
   listar(
     filtro: SolicitudFiltro
@@ -60,7 +67,9 @@ export class SolicitudesService {
       ResultadoPaginado<Solicitud>
     >(
       `${environment.apiUrl}/solicitudes`,
-      { params }
+      {
+        params
+      }
     );
   }
 
@@ -69,6 +78,15 @@ export class SolicitudesService {
   ): Observable<Solicitud> {
     return this.http.get<Solicitud>(
       `${environment.apiUrl}/solicitudes/${id}`
+    );
+  }
+
+  crear(
+    request: CrearSolicitudRequest
+  ): Observable<Solicitud> {
+    return this.http.post<Solicitud>(
+      `${environment.apiUrl}/solicitudes`,
+      request
     );
   }
 

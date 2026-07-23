@@ -1,0 +1,331 @@
+:host {
+  display: block;
+}
+
+.form-page {
+  display: grid;
+  gap: 1.4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-header {
+  h1 {
+    margin: 0.35rem 0;
+    color: #123d5e;
+    font-size: clamp(1.8rem, 3vw, 2.35rem);
+  }
+
+  p {
+    max-width: 700px;
+    margin: 0;
+    color: #687b8a;
+    line-height: 1.55;
+  }
+}
+
+.back-button {
+  margin: 0 0 1rem -0.7rem;
+}
+
+.eyebrow {
+  color: #08769b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 1.4rem;
+  align-items: start;
+}
+
+.form-card,
+.help-card,
+.process-card {
+  border: 1px solid #dce6ed;
+  border-radius: 18px;
+  box-shadow: 0 9px 28px rgb(23 62 91 / 7%);
+}
+
+.form-card {
+  mat-card-header {
+    padding: 1.4rem 1.5rem 1rem;
+  }
+
+  mat-card-content {
+    padding: 0 1.5rem 1.5rem;
+  }
+
+  form {
+    display: grid;
+    gap: 0;
+  }
+}
+
+.card-avatar,
+.help-icon {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e1f2f7;
+  color: #087397;
+}
+
+.form-section {
+  display: grid;
+  gap: 1rem;
+  padding: 1.6rem 0;
+  border-top: 1px solid #e4ebf0;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+
+  h2 {
+    margin: 0;
+    color: #214762;
+    font-size: 1rem;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    color: #758692;
+    font-size: 0.87rem;
+  }
+}
+
+.step-number {
+  display: grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: #087397;
+  color: #fff;
+  font-weight: 800;
+}
+
+.support-selection {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: 1px solid #cfe6ed;
+  border-radius: 12px;
+  background: #f2f9fb;
+
+  strong {
+    color: #1c506b;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    color: #6c808e;
+    font-size: 0.85rem;
+  }
+}
+
+.support-icon {
+  display: grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 11px;
+  background: #dceff5;
+  color: #087397;
+}
+
+.inline-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  color: #607785;
+}
+
+.students-error {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #efc4c8;
+  border-radius: 12px;
+  background: #fff5f5;
+
+  > mat-icon {
+    color: #b82c38;
+  }
+
+  strong {
+    color: #8f2730;
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+    color: #795d61;
+    font-size: 0.82rem;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid #e4ebf0;
+
+  button {
+    min-width: 150px;
+    min-height: 46px;
+  }
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: 0.4rem;
+  }
+}
+
+aside {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.help-card,
+.process-card {
+  mat-card-content {
+    padding: 1.4rem;
+  }
+}
+
+.help-icon {
+  width: 48px;
+  height: 48px;
+  background: #fff0cb;
+  color: #956500;
+}
+
+.help-card {
+  h2 {
+    margin: 1rem 0 0.7rem;
+    color: #234b65;
+    font-size: 1.05rem;
+  }
+
+  ul {
+    display: grid;
+    gap: 0.8rem;
+    margin: 0;
+    padding-left: 1.15rem;
+    color: #617887;
+    line-height: 1.45;
+  }
+
+  li::marker {
+    color: #087397;
+  }
+}
+
+.process-card h3 {
+  margin: 0 0 1.2rem;
+  color: #234b65;
+}
+
+.process-step {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 0.75rem;
+  position: relative;
+  padding-bottom: 1.2rem;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    bottom: 0;
+    left: 14px;
+    width: 2px;
+    background: #dce6ec;
+  }
+
+  > span {
+    display: grid;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: 50%;
+    background: #e8eef2;
+    color: #587080;
+    font-weight: 800;
+  }
+
+  strong,
+  small {
+    display: block;
+  }
+
+  strong {
+    color: #31556c;
+  }
+
+  small {
+    margin-top: 0.15rem;
+    color: #7d8c97;
+  }
+}
+
+.active-step > span {
+  background: #087397;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  aside {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .form-page {
+    padding: 1rem;
+  }
+
+  aside {
+    grid-template-columns: 1fr;
+  }
+
+  .students-error {
+    grid-template-columns: auto 1fr;
+
+    button {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .form-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+
+    button {
+      width: 100%;
+    }
+  }
+}

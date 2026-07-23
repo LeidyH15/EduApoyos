@@ -47,3 +47,10 @@ export interface CambiarEstadoSolicitudRequest {
   nuevoEstado: EstadoSolicitud;
   observacion: string;
 }
+
+export interface CrearSolicitudRequest {
+  estudianteId?: string | null;
+  tipoApoyo: TipoApoyo;
+  montoSolicitado: number;
+  descripcion: string;
+}
