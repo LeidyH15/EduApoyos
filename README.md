@@ -668,6 +668,10 @@ OpenID Connect, evitando almacenar contraseñas de publicación.
 - [Desplegar Angular en Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/deploy-angular)
 - [Azure Blob Storage](https://learn.microsoft.com/azure/storage/blobs/storage-blob-static-website)
 
+## Cierre del proyecto
+
+Las decisiones más relevantes del desarrollo fueron aplicar arquitectura limpia para separar las responsabilidades del sistema; utilizar Repository, Strategy, Factory y Unit of Work para organizar la persistencia, las transiciones de estado y la generación de constancias; implementar autenticación JWT con ASP.NET Core Identity y autorización por rol y propiedad del recurso; y construir el frontend como una SPA Angular con Angular Material, guards de rutas, interceptor HTTP y formularios reactivos. También se priorizaron la trazabilidad, el manejo estandarizado de errores, las pruebas automatizadas, Docker Compose y los pipelines de integración continua para mantener una solución verificable y reproducible. Si dispusiera de más tiempo, incorporaría renovación de tokens, recuperación de contraseña, verificación de correo, constancias en PDF, pruebas end-to-end del navegador, mayor cobertura de ramas, observabilidad con Application Insights y un despliegue productivo en Azure.
+
 ## Autora
 
 Desarrollado por:
