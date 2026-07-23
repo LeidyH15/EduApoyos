@@ -1,3 +1,104 @@
-<main class="app-content">
-  <router-outlet />
-</main>
+<div class="app-layout">
+  <mat-toolbar class="app-toolbar">
+    <a
+      class="brand"
+      [routerLink]="rutaInicio()"
+      aria-label="Ir a la página principal"
+    >
+      <span class="brand-mark">EA</span>
+
+      <span class="brand-name">
+        EduApoyos
+      </span>
+    </a>
+
+    <nav
+      class="main-navigation"
+      aria-label="Navegación principal"
+    >
+      @if (usuario()?.rol === 'Asesor') {
+        <a
+          mat-button
+          routerLink="/asesor/solicitudes"
+          routerLinkActive="active-link"
+        >
+          Solicitudes
+        </a>
+
+        <a
+          mat-button
+          routerLink="/solicitudes/nueva"
+          routerLinkActive="active-link"
+        >
+          Nueva solicitud
+        </a>
+      }
+
+      @if (usuario()?.rol === 'Estudiante') {
+        <a
+          mat-button
+          routerLink="/estudiante/portal"
+          routerLinkActive="active-link"
+        >
+          Mis solicitudes
+        </a>
+
+        <a
+          mat-button
+          routerLink="/solicitudes/nueva"
+          routerLinkActive="active-link"
+        >
+          Nueva solicitud
+        </a>
+      }
+    </nav>
+
+    <span class="toolbar-spacer"></span>
+
+    <div class="user-information">
+      <div class="user-copy">
+        <strong>
+          {{ usuario()?.nombreCompleto }}
+        </strong>
+
+        <span>
+          {{ usuario()?.rol }}
+        </span>
+      </div>
+
+      <div
+        class="user-avatar"
+        aria-hidden="true"
+      >
+        {{
+          usuario()?.nombreCompleto
+            ?.charAt(0)
+            ?.toUpperCase()
+        }}
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        class="logout-button"
+        (click)="cerrarSesion()"
+      >
+        Cerrar sesión
+      </button>
+    </div>
+  </mat-toolbar>
+
+  <main class="app-content">
+    <router-outlet />
+  </main>
+
+  <footer class="app-footer">
+    <span>
+      EduApoyos · Gestión de apoyo económico
+    </span>
+
+    <span>
+      © 2026 Institución de Educación Superior
+    </span>
+  </footer>
+</div>
