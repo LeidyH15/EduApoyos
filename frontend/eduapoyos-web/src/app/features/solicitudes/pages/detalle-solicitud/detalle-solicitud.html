@@ -1,1 +1,445 @@
-<p>detalle-solicitud works!</p>
+<section class="detail-page">
+  <header class="page-header">
+    <div>
+      <button mat-button type="button" class="back-button" (click)="volver()">
+        <mat-icon>arrow_back</mat-icon>
+        Volver
+      </button>
+
+      <span class="eyebrow">
+        Seguimiento de solicitud
+      </span>
+
+      <h1>Detalle de la solicitud</h1>
+
+      <p>
+        Consulta la información, el estado actual y el
+        historial de cambios.
+      </p>
+    </div>
+  </header>
+
+  @if (cargando()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Cargando información de la solicitud...</p>
+  </div>
+  } @else if (mensajeError()) {
+  <mat-card class="feedback-card">
+    <span class="feedback-icon error-icon">
+      <mat-icon>cloud_off</mat-icon>
+    </span>
+
+    <h2>No pudimos cargar la solicitud</h2>
+
+    <p>{{ mensajeError() }}</p>
+
+    <div class="feedback-actions">
+      <button mat-stroked-button type="button" (click)="volver()">
+        Volver
+      </button>
+
+      <button mat-flat-button color="primary" type="button" (click)="cargarSolicitud()">
+        <mat-icon>refresh</mat-icon>
+        Intentar nuevamente
+      </button>
+    </div>
+  </mat-card>
+  } @else if (solicitud(); as item) {
+  <div class="summary-banner">
+    <div class="summary-main">
+      <span class="state-icon" [class]="
+            'state-icon ' +
+            obtenerClaseEstado(item.estado)
+          ">
+        <mat-icon>
+          {{ obtenerIconoEstado(item.estado) }}
+        </mat-icon>
+      </span>
+
+      <div>
+        <span class="summary-label">
+          Estado actual
+        </span>
+
+        <h2>
+          {{ obtenerNombreEstado(item.estado) }}
+        </h2>
+
+        <p>
+          Última actualización:
+          {{
+          item.fechaActualizacion
+          | date:'dd/MM/yyyy, h:mm a'
+          }}
+        </p>
+      </div>
+    </div>
+
+    @if (puedeDescargarConstancia()) {
+    <button mat-flat-button color="primary" type="button" [disabled]="descargandoConstancia()"
+      (click)="descargarConstancia()">
+      @if (descargandoConstancia()) {
+      <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+      <mat-icon>download</mat-icon>
+      }
+
+      Descargar constancia
+    </button>
+    }
+  </div>
+
+  <div class="detail-layout">
+    <div class="main-column">
+      <mat-card class="content-card">
+        <mat-card-header>
+          <span mat-card-avatar class="card-avatar">
+            <mat-icon>person</mat-icon>
+          </span>
+
+          <mat-card-title>
+            Información del estudiante
+          </mat-card-title>
+
+          <mat-card-subtitle>
+            Datos del solicitante
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="information-grid">
+            <div class="information-item">
+              <span>Nombre completo</span>
+              <strong>
+                {{ item.nombreEstudiante }}
+              </strong>
+            </div>
+
+            <div class="information-item">
+              <span>Número de documento</span>
+              <strong>
+                {{ item.numeroDocumento }}
+              </strong>
+            </div>
+
+            <div class="information-item">
+              <span>Identificador del estudiante</span>
+              <strong class="identifier">
+                {{ item.estudianteId }}
+              </strong>
+            </div>
+
+            <div class="information-item">
+              <span>Asesor asignado</span>
+              <strong>
+                {{ item.asesorId ?? 'Sin asignar' }}
+              </strong>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="content-card">
+        <mat-card-header>
+          <span mat-card-avatar class="card-avatar">
+            <mat-icon>request_quote</mat-icon>
+          </span>
+
+          <mat-card-title>
+            Información del apoyo
+          </mat-card-title>
+
+          <mat-card-subtitle>
+            Datos económicos de la solicitud
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="support-summary">
+            <div class="support-item">
+              <span>Tipo de apoyo</span>
+
+              <strong>
+                {{
+                obtenerNombreTipoApoyo(
+                item.tipoApoyo
+                )
+                }}
+              </strong>
+            </div>
+
+            <div class="support-item amount-item">
+              <span>Monto solicitado</span>
+
+              <strong>
+                {{
+                item.montoSolicitado
+                | currency:
+                'COP':
+                'symbol-narrow':
+                '1.0-0'
+                }}
+              </strong>
+            </div>
+
+            <div class="support-item">
+              <span>Fecha de solicitud</span>
+
+              <strong>
+                {{
+                item.fechaSolicitud
+                | date:'dd/MM/yyyy'
+                }}
+              </strong>
+
+              <small>
+                {{
+                item.fechaSolicitud
+                | date:'h:mm a'
+                }}
+              </small>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="description-section">
+            <span>Descripción de la solicitud</span>
+
+            <p>{{ item.descripcion }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="content-card">
+        <mat-card-header>
+          <span mat-card-avatar class="card-avatar">
+            <mat-icon>history</mat-icon>
+          </span>
+
+          <mat-card-title>
+            Historial de estados
+          </mat-card-title>
+
+          <mat-card-subtitle>
+            Trazabilidad de la solicitud
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (item.historial.length === 0) {
+          <div class="empty-history">
+            <mat-icon>schedule</mat-icon>
+
+            <div>
+              <strong>
+                La solicitud aún no tiene cambios
+              </strong>
+
+              <p>
+                Actualmente permanece en su estado
+                inicial.
+              </p>
+            </div>
+          </div>
+          } @else {
+          <div class="timeline">
+            @for (
+            cambio of item.historial;
+            track cambio.id;
+            let ultimo = $last
+            ) {
+            <div class="timeline-item" [class.last-item]="ultimo">
+              <div class="timeline-marker">
+                <span></span>
+              </div>
+
+              <div class="timeline-content">
+                <div class="timeline-heading">
+                  <strong>
+                    {{
+                    obtenerNombreEstado(
+                    cambio.estadoNuevo
+                    )
+                    }}
+                  </strong>
+
+                  <time>
+                    {{
+                    cambio.fechaCambio
+                    | date:
+                    'dd/MM/yyyy, h:mm a'
+                    }}
+                  </time>
+                </div>
+
+                <p>
+                  Cambio de
+                  <b>
+                    {{
+                    obtenerNombreEstado(
+                    cambio.estadoAnterior
+                    )
+                    }}
+                  </b>
+                  a
+                  <b>
+                    {{
+                    obtenerNombreEstado(
+                    cambio.estadoNuevo
+                    )
+                    }}
+                  </b>.
+                </p>
+
+                @if (cambio.observacion) {
+                <blockquote>
+                  {{ cambio.observacion }}
+                </blockquote>
+                }
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <aside class="side-column">
+      @if (esAsesor()) {
+      <mat-card class="status-card">
+        <mat-card-header>
+          <span mat-card-avatar class="card-avatar">
+            <mat-icon>published_with_changes</mat-icon>
+          </span>
+
+          <mat-card-title>
+            Gestionar estado
+          </mat-card-title>
+
+          <mat-card-subtitle>
+            Acción exclusiva del asesor
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (puedeCambiarEstado()) {
+          <form [formGroup]="formularioEstado" (ngSubmit)="cambiarEstado()">
+            <mat-form-field appearance="outline">
+              <mat-label>Nuevo estado</mat-label>
+
+              <mat-select formControlName="nuevoEstado">
+                @for (
+                opcion of opcionesEstado();
+                track opcion.valor
+                ) {
+                <mat-option [value]="opcion.valor">
+                  {{ opcion.nombre }}
+                </mat-option>
+                }
+              </mat-select>
+
+              @if (
+              formularioEstado.controls
+              .nuevoEstado.touched &&
+              formularioEstado.controls
+              .nuevoEstado.hasError('required')
+              ) {
+              <mat-error>
+                Selecciona el nuevo estado.
+              </mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Observación</mat-label>
+
+              <textarea matInput formControlName="observacion" rows="5" maxlength="500"
+                placeholder="Describe el motivo o resultado de la revisión"></textarea>
+
+              <mat-hint align="end">
+                {{
+                formularioEstado.controls
+                .observacion.value.length
+                }}/500
+              </mat-hint>
+
+              @if (
+              formularioEstado.controls
+              .observacion.touched &&
+              formularioEstado.controls
+              .observacion.hasError('required')
+              ) {
+              <mat-error>
+                La observación es obligatoria.
+              </mat-error>
+              }
+
+              @if (
+              formularioEstado.controls
+              .observacion.touched &&
+              formularioEstado.controls
+              .observacion.hasError('minlength')
+              ) {
+              <mat-error>
+                Escribe al menos 5 caracteres.
+              </mat-error>
+              }
+            </mat-form-field>
+
+            <button mat-flat-button color="primary" type="submit" class="submit-button" [disabled]="
+    formularioEstado.invalid ||
+    guardandoEstado()
+  ">
+              @if (guardandoEstado()) {
+              <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+              <mat-icon>save</mat-icon>
+              }
+
+              <span>
+                {{
+                guardandoEstado()
+                ? 'Guardando...'
+                : 'Actualizar estado'
+                }}
+              </span>
+            </button>
+          </form>
+          } @else {
+          <div class="closed-state">
+            <mat-icon>verified</mat-icon>
+
+            <h3>Proceso finalizado</h3>
+
+            <p>
+              Esta solicitud se encuentra
+              {{
+              item.estado ===
+              EstadoSolicitud.Aprobada
+              ? 'aprobada'
+              : 'rechazada'
+              }}
+              y no admite más cambios.
+            </p>
+          </div>
+          }
+        </mat-card-content>
+      </mat-card>
+      }
+
+      <mat-card class="reference-card">
+        <mat-card-content>
+          <mat-icon>fingerprint</mat-icon>
+
+          <span>Referencia de la solicitud</span>
+
+          <strong>{{ item.id }}</strong>
+        </mat-card-content>
+      </mat-card>
+    </aside>
+  </div>
+  }
+</section>

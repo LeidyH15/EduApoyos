@@ -42,3 +42,8 @@ export interface SolicitudFiltro {
   estado?: EstadoSolicitud | null;
   tipoApoyo?: TipoApoyo | null;
 }
+
+export interface CambiarEstadoSolicitudRequest {
+  nuevoEstado: EstadoSolicitud;
+  observacion: string;
+}
