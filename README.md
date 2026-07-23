@@ -3,19 +3,23 @@
 ## EduApoyos
 
 [![Backend CI](https://github.com/LeidyH15/EduApoyos/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/LeidyH15/EduApoyos/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/LeidyH15/EduApoyos/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/LeidyH15/EduApoyos/actions/workflows/frontend-ci.yml)
 
-### API para la gestión de solicitudes de apoyo económico estudiantil
+### Plataforma para la gestión de solicitudes de apoyo económico estudiantil
 
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-Web_API-6C3483?style=for-the-badge&logo=dotnet&logoColor=white)
 ![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+![Angular Material](https://img.shields.io/badge/Angular_Material-UI-3F51B5?style=for-the-badge&logo=angular&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-26_aprobadas-2EA44F?style=for-the-badge)
+![Backend Tests](https://img.shields.io/badge/Backend_tests-26_aprobadas-2EA44F?style=for-the-badge)
+![Frontend Tests](https://img.shields.io/badge/Frontend_tests-38_aprobadas-2EA44F?style=for-the-badge)
 ![Coverage](https://img.shields.io/badge/Cobertura-84%25-2EA44F?style=for-the-badge)
 
 <br>
 
-**Backend desarrollado con arquitectura limpia, autenticación JWT, trazabilidad de estados, pruebas automatizadas y documentación OpenAPI.**
+**Solución full stack con ASP.NET Core 8, Angular 22, autenticación JWT, control por roles, trazabilidad, pruebas automatizadas y pipelines CI.**
 
 </div>
 
@@ -31,8 +35,7 @@ Una institución de educación superior requiere centralizar la gestión de soli
 
 **EduApoyos** permite a los asesores registrar y administrar estudiantes y solicitudes, mientras que cada estudiante puede consultar el estado de sus solicitudes desde un portal de autogestión y descargar una constancia.
 
-> [!NOTE]
-> Este repositorio contiene actualmente el backend. El frontend se desarrollará como un incremento posterior.
+El repositorio contiene la API REST, el frontend Angular, las migraciones, los scripts SQL, las pruebas automatizadas, Docker Compose y los flujos de integración continua.
 
 ---
 
@@ -59,6 +62,10 @@ Pendiente → En revisión → Aprobada
 - Errores estandarizados mediante `ProblemDetails`.
 - Validaciones mediante DataAnnotations y reglas de dominio.
 - Documentación interactiva mediante Swagger/OpenAPI.
+- Interfaz web responsive construida con Angular Material.
+- Guards de rutas para autenticación y autorización por rol.
+- Interceptor HTTP para adjuntar el JWT a las solicitudes.
+- Indicadores de carga y retroalimentación visual de errores y confirmaciones.
 
 ---
 
@@ -78,6 +85,16 @@ EduApoyos
 │   └── EduApoyos.IntegrationTests
 ├── database
 │   └── scripts
+├── frontend
+│   └── eduapoyos-web
+│       ├── src/app/core
+│       ├── src/app/features
+│       ├── src/app/layout
+│       └── src/app/shared
+├── .github
+│   └── workflows
+│       ├── backend-ci.yml
+│       └── frontend-ci.yml
 ├── docker-compose.yml
 ├── coverlet.runsettings
 └── EduApoyos.sln
@@ -91,6 +108,7 @@ EduApoyos
 | `Api` | Controladores, autenticación, middleware de errores, Swagger y configuración HTTP. |
 | `UnitTests` | Pruebas aisladas de entidades y reglas de dominio. |
 | `IntegrationTests` | Pruebas de flujos HTTP, autenticación, autorización, persistencia y descargas. |
+| `frontend/eduapoyos-web` | SPA Angular organizada por funcionalidades, componentes compartidos, servicios, guards e interceptores. |
 
 La dirección de dependencias mantiene el dominio independiente de frameworks y detalles externos.
 
@@ -151,6 +169,11 @@ Las estrategias de estado encapsulan las transiciones permitidas de una solicitu
 | Pruebas | xUnit, Moq y WebApplicationFactory |
 | Cobertura | Coverlet y ReportGenerator |
 | Contenedores | Docker y Docker Compose |
+| Frontend | Angular 22 y TypeScript |
+| Sistema de diseño | Angular Material |
+| Estado y formularios | Signals y Reactive Forms |
+| Pruebas frontend | Vitest y Angular TestBed |
+| CI | GitHub Actions |
 
 ---
 
@@ -162,6 +185,9 @@ Las estrategias de estado encapsulan las transiciones permitidas de una solicitu
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - Git
 - Visual Studio o un IDE compatible con .NET 8
+- Node.js 24.18 o una versión admitida por Angular 22
+- npm 11
+- Visual Studio Code recomendado para el frontend
 
 Compruebe las instalaciones:
 
@@ -170,6 +196,8 @@ dotnet --version
 docker --version
 docker compose version
 git --version
+node --version
+npm --version
 ```
 
 ### 1. Clonar el repositorio
@@ -264,6 +292,31 @@ Swagger estará disponible en:
 https://localhost:7120/swagger
 ```
 
+### 7. Instalar y ejecutar el frontend
+
+En otra terminal:
+
+```powershell
+Set-Location frontend/eduapoyos-web
+npm ci
+npm start
+```
+
+La aplicación web estará disponible en:
+
+```text
+http://localhost:4200
+```
+
+El servidor de desarrollo utiliza `proxy.conf.json` para enviar las solicitudes `/api` a la API local. Por ello, la API debe estar ejecutándose en `https://localhost:7120`.
+
+Para compilar y ejecutar las pruebas del frontend:
+
+```powershell
+npm run build
+npm test -- --watch=false
+```
+
 ---
 
 ## Autenticación y roles
@@ -292,6 +345,39 @@ Para utilizar endpoints protegidos desde Swagger:
 3. Seleccione **Authorize**.
 4. Ingrese solamente el token, sin escribir la palabra `Bearer`.
 5. Ejecute el endpoint protegido.
+
+---
+
+## Frontend Angular
+
+El frontend se encuentra en `frontend/eduapoyos-web` y utiliza componentes standalone, carga diferida de rutas y Angular Material como sistema de diseño.
+
+### Vistas implementadas
+
+| Vista | Ruta | Funcionalidad |
+|---|---|---|
+| Inicio de sesión | `/login` | Autenticación, manejo de errores y redirección según el rol. |
+| Panel del asesor | `/asesor/solicitudes` | Tabla paginada, filtros por estado y tipo de apoyo, y acceso al detalle. |
+| Nueva solicitud | `/solicitudes/nueva` | Formulario reactivo con validación y creación para asesor o estudiante. |
+| Detalle de solicitud | `/solicitudes/{id}` | Información, historial, cambio de estado para el asesor y descarga de constancia. |
+| Portal del estudiante | `/estudiante/portal` | Solicitudes propias, resumen por estado, paginación y acceso al detalle. |
+
+### Seguridad en el cliente
+
+- `authGuard` impide acceder a rutas protegidas sin una sesión válida.
+- `roleGuard` limita las vistas según los roles `Asesor` y `Estudiante`.
+- El interceptor HTTP agrega el encabezado `Authorization: Bearer <token>`.
+- La sesión se conserva en `sessionStorage` y se elimina al cerrar sesión o expirar el JWT.
+- La contraseña nunca se guarda en el navegador.
+- La API conserva la autoridad sobre los permisos y la propiedad de los recursos.
+
+### Experiencia de usuario
+
+- Indicadores de carga durante las operaciones HTTP.
+- Mensajes visuales para confirmaciones y errores.
+- Validaciones de formularios antes de enviar datos.
+- Navegación y menús adaptados al rol autenticado.
+- Diseño responsive con Angular Material y SCSS.
 
 ---
 
@@ -424,6 +510,22 @@ Get-Content CoverageReport/Summary.txt
 
 Las migraciones generadas por EF Core se excluyen del cálculo porque no contienen lógica escrita manualmente.
 
+### Pruebas del frontend
+
+Las pruebas cubren componentes, navegación, formularios, consultas de solicitudes, manejo de errores y comportamiento por rol.
+
+```powershell
+Set-Location frontend/eduapoyos-web
+npm test -- --watch=false
+```
+
+Estado actual:
+
+```text
+38 pruebas aprobadas
+0 pruebas fallidas
+```
+
 ---
 
 ## Consideraciones de seguridad
@@ -435,14 +537,17 @@ Las migraciones generadas por EF Core se excluyen del cálculo porque no contien
 - Las credenciales locales se mantienen fuera del repositorio.
 - Los errores internos no exponen trazas ni información sensible al cliente.
 - Swagger se habilita exclusivamente en el ambiente de desarrollo.
+- El frontend no almacena contraseñas y elimina la sesión cuando el token expira.
+- Los guards protegen la navegación y el interceptor centraliza el envío del JWT.
 
 ---
 
 ## Decisiones y mejoras futuras
 
 - La constancia se genera actualmente como texto para cumplir el requisito sin introducir dependencias innecesarias. El Factory permite incorporar PDF posteriormente.
-- El frontend se implementará como una SPA que consumirá esta API.
+- El frontend está implementado como una SPA Angular y consume la API mediante servicios HTTP tipados.
 - Se puede incorporar renovación de tokens, recuperación de contraseña y verificación de correo.
+- Se puede incorporar generación de constancias en PDF y pruebas end-to-end del navegador.
 - Para producción se recomienda utilizar un gestor de secretos, HTTPS administrado, observabilidad centralizada y CI/CD.
 - Las mediciones de rendimiento deben ejecutarse en un ambiente equivalente al despliegue objetivo.
 
@@ -543,6 +648,14 @@ GitHub Actions y ejecuta automáticamente:
 6. Publicación de la API.
 7. Generación del artefacto `eduapoyos-api`.
 
+El archivo `.github/workflows/frontend-ci.yml` ejecuta automáticamente:
+
+1. Configuración de Node.js.
+2. Instalación reproducible mediante `npm ci`.
+3. Compilación de producción del frontend.
+4. Ejecución de las pruebas con Vitest.
+5. Generación del artefacto `eduapoyos-web`.
+
 En un despliegue real se agregaría una etapa posterior que publicaría ese
 artefacto en Azure App Service utilizando credenciales federadas mediante
 OpenID Connect, evitando almacenar contraseñas de publicación.
@@ -568,6 +681,6 @@ Desarrollado por:
 
 ---
 
-**EduApoyos · Arquitectura limpia · .NET 8 · SQL Server**
+**EduApoyos · .NET 8 · Angular 22 · SQL Server · Arquitectura limpia**
 
 </div>
