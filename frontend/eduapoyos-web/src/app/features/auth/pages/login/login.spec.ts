@@ -1,6 +1,16 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { Login } from './login';
+import {
+  provideHttpClient
+} from '@angular/common/http';
+import {
+  ComponentFixture,
+  TestBed
+} from '@angular/core/testing';
+import {
+  provideRouter
+} from '@angular/router';
+import {
+  Login
+} from './login';
 
 describe('Login', () => {
   let component: Login;
@@ -8,15 +18,34 @@ describe('Login', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Login],
+      imports: [
+        Login
+      ],
+      providers: [
+        provideHttpClient(),
+        provideRouter([])
+      ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Login);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture =
+      TestBed.createComponent(Login);
+
+    component =
+      fixture.componentInstance;
+
+    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should render login title', () => {
+    const compiled =
+      fixture.nativeElement as HTMLElement;
+
+    expect(
+      compiled.textContent
+    ).toContain('Iniciar sesión');
   });
 });
