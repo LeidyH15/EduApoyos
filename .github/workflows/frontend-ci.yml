@@ -1,0 +1,61 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/eduapoyos-web/**"
+      - ".github/workflows/frontend-ci.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "frontend/eduapoyos-web/**"
+      - ".github/workflows/frontend-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build and Test Angular
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend/eduapoyos-web
+
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v7
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: frontend/eduapoyos-web/package-lock.json
+
+      - name: Mostrar versiones
+        run: |
+          node --version
+          npm --version
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar frontend
+        run: npm run build
+
+      - name: Ejecutar pruebas
+        run: npm test -- --watch=false
+
+      - name: Cargar artefacto del frontend
+        uses: actions/upload-artifact@v7
+        with:
+          name: eduapoyos-web
+          path: frontend/eduapoyos-web/dist/eduapoyos-web
+          if-no-files-found: error
+          retention-days: 7
