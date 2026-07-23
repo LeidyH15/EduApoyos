@@ -1,1 +1,369 @@
-<p>panel-asesor works!</p>
+<section class="panel-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Gestión de apoyos</span>
+
+      <h1>Solicitudes de apoyo</h1>
+
+      <p>
+        Consulta, filtra y realiza seguimiento a las
+        solicitudes registradas por los estudiantes.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="crearSolicitud()"
+    >
+      <mat-icon>add</mat-icon>
+      Nueva solicitud
+    </button>
+  </header>
+
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-header">
+        <div>
+          <h2>Filtros de búsqueda</h2>
+
+          <p>
+            Puedes filtrar las solicitudes por estado
+            y tipo de apoyo.
+          </p>
+        </div>
+
+        <mat-icon class="filter-icon">
+          filter_alt
+        </mat-icon>
+      </div>
+
+      <div class="filters-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+
+          <mat-select [formControl]="filtroEstado">
+            <mat-option [value]="null">
+              Todos los estados
+            </mat-option>
+
+            <mat-option
+              [value]="EstadoSolicitud.Pendiente"
+            >
+              Pendiente
+            </mat-option>
+
+            <mat-option
+              [value]="EstadoSolicitud.EnRevision"
+            >
+              En revisión
+            </mat-option>
+
+            <mat-option
+              [value]="EstadoSolicitud.Aprobada"
+            >
+              Aprobada
+            </mat-option>
+
+            <mat-option
+              [value]="EstadoSolicitud.Rechazada"
+            >
+              Rechazada
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de apoyo</mat-label>
+
+          <mat-select [formControl]="filtroTipoApoyo">
+            <mat-option [value]="null">
+              Todos los tipos
+            </mat-option>
+
+            <mat-option [value]="TipoApoyo.Beca">
+              Beca
+            </mat-option>
+
+            <mat-option [value]="TipoApoyo.Credito">
+              Crédito
+            </mat-option>
+
+            <mat-option [value]="TipoApoyo.Subsidio">
+              Subsidio
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="filter-actions">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="limpiarFiltros()"
+          >
+            <mat-icon>restart_alt</mat-icon>
+            Limpiar
+          </button>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="buscar()"
+          >
+            <mat-icon>search</mat-icon>
+            Buscar
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="results-card">
+    <div class="results-header">
+      <div>
+        <h2>Solicitudes registradas</h2>
+
+        <p>
+          {{ totalElementos() }}
+          @if (totalElementos() === 1) {
+            solicitud encontrada
+          } @else {
+            solicitudes encontradas
+          }
+        </p>
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        aria-label="Actualizar listado"
+        title="Actualizar listado"
+        [disabled]="cargando()"
+        (click)="cargarSolicitudes()"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    @if (cargando()) {
+      <div class="loading-state">
+        <mat-spinner diameter="44"></mat-spinner>
+
+        <p>Cargando solicitudes...</p>
+      </div>
+    } @else if (mensajeError()) {
+      <div class="feedback-state error-state">
+        <span class="feedback-icon">
+          <mat-icon>cloud_off</mat-icon>
+        </span>
+
+        <h3>No pudimos cargar la información</h3>
+
+        <p>{{ mensajeError() }}</p>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          (click)="cargarSolicitudes()"
+        >
+          <mat-icon>refresh</mat-icon>
+          Intentar nuevamente
+        </button>
+      </div>
+    } @else if (!haySolicitudes()) {
+      <div class="feedback-state empty-state">
+        <span class="feedback-icon">
+          <mat-icon>inbox</mat-icon>
+        </span>
+
+        <h3>No hay solicitudes para mostrar</h3>
+
+        <p>
+          No se encontraron solicitudes con los filtros
+          seleccionados.
+        </p>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="limpiarFiltros()"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table
+          mat-table
+          [dataSource]="solicitudes()"
+          class="requests-table"
+        >
+          <ng-container matColumnDef="estudiante">
+            <th mat-header-cell *matHeaderCellDef>
+              Estudiante
+            </th>
+
+            <td mat-cell *matCellDef="let solicitud">
+              <div class="student-cell">
+                <span class="student-avatar">
+                  {{
+                    solicitud.nombreEstudiante
+                      .charAt(0)
+                      .toUpperCase()
+                  }}
+                </span>
+
+                <div>
+                  <strong>
+                    {{ solicitud.nombreEstudiante }}
+                  </strong>
+
+                  <span>
+                    {{ solicitud.numeroDocumento }}
+                  </span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="tipoApoyo">
+            <th mat-header-cell *matHeaderCellDef>
+              Tipo de apoyo
+            </th>
+
+            <td mat-cell *matCellDef="let solicitud">
+              <span class="support-type">
+                <mat-icon>
+                  {{
+                    solicitud.tipoApoyo === TipoApoyo.Beca
+                      ? 'school'
+                      : solicitud.tipoApoyo ===
+                          TipoApoyo.Credito
+                        ? 'account_balance'
+                        : 'volunteer_activism'
+                  }}
+                </mat-icon>
+
+                {{
+                  obtenerNombreTipoApoyo(
+                    solicitud.tipoApoyo
+                  )
+                }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef>
+              Monto solicitado
+            </th>
+
+            <td mat-cell *matCellDef="let solicitud">
+              <strong class="amount">
+                {{
+                  solicitud.montoSolicitado
+                    | currency:
+                      'COP':
+                      'symbol-narrow':
+                      '1.0-0'
+                }}
+              </strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>
+              Estado
+            </th>
+
+            <td mat-cell *matCellDef="let solicitud">
+              <span
+                class="status-badge"
+                [class]="
+                  'status-badge ' +
+                  obtenerClaseEstado(solicitud.estado)
+                "
+              >
+                <span class="status-dot"></span>
+
+                {{
+                  obtenerNombreEstado(
+                    solicitud.estado
+                  )
+                }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fechaSolicitud">
+            <th mat-header-cell *matHeaderCellDef>
+              Fecha de solicitud
+            </th>
+
+            <td mat-cell *matCellDef="let solicitud">
+              <div class="date-cell">
+                <strong>
+                  {{
+                    solicitud.fechaSolicitud
+                      | date:'dd/MM/yyyy'
+                  }}
+                </strong>
+
+                <span>
+                  {{
+                    solicitud.fechaSolicitud
+                      | date:'h:mm a'
+                  }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>
+              Acciones
+            </th>
+
+            <td mat-cell *matCellDef="let solicitud">
+              <button
+                mat-stroked-button
+                type="button"
+                color="primary"
+                (click)="verDetalle(solicitud.id)"
+              >
+                Ver detalle
+                <mat-icon iconPositionEnd>
+                  arrow_forward
+                </mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr
+            mat-header-row
+            *matHeaderRowDef="columnas"
+          ></tr>
+
+          <tr
+            mat-row
+            *matRowDef="let fila; columns: columnas"
+          ></tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [length]="totalElementos()"
+        [pageIndex]="pagina() - 1"
+        [pageSize]="tamanoPagina()"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        [showFirstLastButtons]="true"
+        aria-label="Paginación de solicitudes"
+        (page)="cambiarPagina($event)"
+      >
+      </mat-paginator>
+    }
+  </mat-card>
+</section>
