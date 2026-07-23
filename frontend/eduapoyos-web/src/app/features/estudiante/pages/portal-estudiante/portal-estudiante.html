@@ -1,1 +1,355 @@
-<p>portal-estudiante works!</p>
+<section class="portal-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">
+        PORTAL DEL ESTUDIANTE
+      </span>
+
+      <h1>Mis solicitudes</h1>
+
+      <p>
+        Consulta el estado de tus solicitudes de apoyo
+        económico y revisa su información.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      type="button"
+      (click)="crearSolicitud()">
+      <mat-icon>add</mat-icon>
+      Nueva solicitud
+    </button>
+  </header>
+
+  <mat-card class="welcome-card">
+    <mat-card-content>
+      <div class="welcome-icon">
+        <mat-icon>school</mat-icon>
+      </div>
+
+      <div>
+        <span class="welcome-label">
+          BIENVENIDO
+        </span>
+
+        <h2>
+          {{ usuarioActual()?.nombreCompleto }}
+        </h2>
+
+        <p>
+          Desde aquí puedes consultar y hacer seguimiento
+          a tus solicitudes de apoyo.
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <section
+    class="summary-grid"
+    aria-label="Resumen de solicitudes">
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon total">
+          <mat-icon>description</mat-icon>
+        </div>
+
+        <div>
+          <span>Total de solicitudes</span>
+          <strong>{{ totalElementos() }}</strong>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon pending">
+          <mat-icon>schedule</mat-icon>
+        </div>
+
+        <div>
+          <span>Pendientes en esta página</span>
+          <strong>{{ solicitudesPendientes() }}</strong>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon review">
+          <mat-icon>manage_search</mat-icon>
+        </div>
+
+        <div>
+          <span>En revisión en esta página</span>
+          <strong>{{ solicitudesEnRevision() }}</strong>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon finished">
+          <mat-icon>task_alt</mat-icon>
+        </div>
+
+        <div>
+          <span>Finalizadas en esta página</span>
+          <strong>{{ solicitudesFinalizadas() }}</strong>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <mat-card class="requests-card">
+    <mat-card-header>
+      <div class="requests-heading">
+        <div>
+          <mat-card-title>
+            Solicitudes registradas
+          </mat-card-title>
+
+          <mat-card-subtitle>
+            {{ totalElementos() }}
+            {{ totalElementos() === 1
+              ? 'solicitud encontrada'
+              : 'solicitudes encontradas' }}
+          </mat-card-subtitle>
+        </div>
+
+        <button
+          mat-icon-button
+          type="button"
+          aria-label="Actualizar solicitudes"
+          [disabled]="cargando()"
+          (click)="cargarSolicitudes()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (cargando()) {
+        <div class="state-container">
+          <mat-spinner diameter="42"></mat-spinner>
+
+          <p>Cargando tus solicitudes...</p>
+        </div>
+      } @else if (mensajeError()) {
+        <div class="state-container error-state">
+          <mat-icon>error_outline</mat-icon>
+
+          <h3>No fue posible cargar la información</h3>
+
+          <p>{{ mensajeError() }}</p>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="cargarSolicitudes()">
+            <mat-icon>refresh</mat-icon>
+            Intentar nuevamente
+          </button>
+        </div>
+      } @else if (!haySolicitudes()) {
+        <div class="state-container empty-state">
+          <mat-icon>note_add</mat-icon>
+
+          <h3>Aún no tienes solicitudes</h3>
+
+          <p>
+            Crea tu primera solicitud de apoyo económico
+            para comenzar el proceso.
+          </p>
+
+          <button
+            mat-flat-button
+            type="button"
+            (click)="crearSolicitud()">
+            <mat-icon>add</mat-icon>
+            Crear solicitud
+          </button>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table
+            mat-table
+            [dataSource]="solicitudes()"
+            class="requests-table">
+
+            <ng-container matColumnDef="tipoApoyo">
+              <th mat-header-cell *matHeaderCellDef>
+                Tipo de apoyo
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let solicitud"
+                data-label="Tipo de apoyo">
+                <div class="support-type">
+                  <mat-icon>
+                    {{ obtenerIconoTipoApoyo(
+                      solicitud.tipoApoyo
+                    ) }}
+                  </mat-icon>
+
+                  <span>
+                    {{ obtenerNombreTipoApoyo(
+                      solicitud.tipoApoyo
+                    ) }}
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="monto">
+              <th mat-header-cell *matHeaderCellDef>
+                Monto solicitado
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let solicitud"
+                data-label="Monto solicitado">
+                <strong class="amount">
+                  {{
+                    solicitud.montoSolicitado
+                      | currency:
+                        'COP':
+                        'symbol-narrow':
+                        '1.0-0'
+                  }}
+                </strong>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>
+                Estado
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let solicitud"
+                data-label="Estado">
+                <mat-chip
+                  [class]="obtenerClaseEstado(
+                    solicitud.estado
+                  )">
+                  <mat-icon matChipAvatar>
+                    {{ obtenerIconoEstado(
+                      solicitud.estado
+                    ) }}
+                  </mat-icon>
+
+                  {{ obtenerNombreEstado(
+                    solicitud.estado
+                  ) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fechaSolicitud">
+              <th mat-header-cell *matHeaderCellDef>
+                Fecha de solicitud
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let solicitud"
+                data-label="Fecha de solicitud">
+                <div class="date-cell">
+                  <strong>
+                    {{
+                      solicitud.fechaSolicitud
+                        | date:'dd/MM/yyyy'
+                    }}
+                  </strong>
+
+                  <span>
+                    {{
+                      solicitud.fechaSolicitud
+                        | date:'shortTime'
+                    }}
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fechaActualizacion">
+              <th mat-header-cell *matHeaderCellDef>
+                Última actualización
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let solicitud"
+                data-label="Última actualización">
+                <div class="date-cell">
+                  <strong>
+                    {{
+                      solicitud.fechaActualizacion
+                        | date:'dd/MM/yyyy'
+                    }}
+                  </strong>
+
+                  <span>
+                    {{
+                      solicitud.fechaActualizacion
+                        | date:'shortTime'
+                    }}
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>
+                Acciones
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let solicitud"
+                data-label="Acciones">
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="verDetalle(solicitud.id)">
+                  Ver detalle
+                  <mat-icon iconPositionEnd>
+                    arrow_forward
+                  </mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="columnas">
+            </tr>
+
+            <tr
+              mat-row
+              *matRowDef="
+                let solicitud;
+                columns: columnas
+              ">
+            </tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          [length]="totalElementos()"
+          [pageIndex]="pagina() - 1"
+          [pageSize]="tamanoPagina()"
+          [pageSizeOptions]="[5, 10, 20]"
+          [showFirstLastButtons]="true"
+          aria-label="Paginación de solicitudes"
+          (page)="cambiarPagina($event)">
+        </mat-paginator>
+      }
+    </mat-card-content>
+  </mat-card>
+</section>

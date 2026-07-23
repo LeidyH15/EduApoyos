@@ -1,0 +1,397 @@
+:host {
+  display: block;
+}
+
+.portal-page {
+  width: min(1120px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 64px 0 80px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 28px;
+
+  .eyebrow {
+    display: block;
+    margin-bottom: 8px;
+    color: #00779b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+  }
+
+  h1 {
+    margin: 0;
+    color: #003b64;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    line-height: 1.1;
+  }
+
+  p {
+    max-width: 680px;
+    margin: 10px 0 0;
+    color: #5d7085;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  button {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding-inline: 22px;
+    border-radius: 3px;
+  }
+}
+
+.welcome-card,
+.summary-card,
+.requests-card {
+  border: 1px solid #d7e3ee;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(12, 59, 91, 0.07);
+}
+
+.welcome-card {
+  margin-bottom: 24px;
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+  }
+
+  .welcome-icon {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 50%;
+    background: #dff4f8;
+    color: #00779b;
+
+    mat-icon {
+      width: 28px;
+      height: 28px;
+      font-size: 28px;
+    }
+  }
+
+  .welcome-label {
+    color: #00779b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+  }
+
+  h2 {
+    margin: 4px 0;
+    color: #003b64;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.45rem;
+  }
+
+  p {
+    margin: 0;
+    color: #65778a;
+    line-height: 1.5;
+  }
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 104px;
+    padding: 18px;
+  }
+
+  .summary-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 12px;
+
+    &.total {
+      background: #dceeff;
+      color: #075f9c;
+    }
+
+    &.pending {
+      background: #fff0c9;
+      color: #a96b00;
+    }
+
+    &.review {
+      background: #dff4f8;
+      color: #00779b;
+    }
+
+    &.finished {
+      background: #dff5e8;
+      color: #158456;
+    }
+  }
+
+  span {
+    display: block;
+    min-height: 34px;
+    color: #607489;
+    font-size: 0.78rem;
+    line-height: 1.3;
+  }
+
+  strong {
+    display: block;
+    margin-top: 4px;
+    color: #003b64;
+    font-size: 1.7rem;
+    line-height: 1;
+  }
+}
+
+.requests-card {
+  overflow: hidden;
+
+  mat-card-header {
+    display: block;
+    padding: 24px;
+    border-bottom: 1px solid #e1e9f0;
+  }
+
+  mat-card-content {
+    padding: 0;
+  }
+
+  mat-card-title {
+    color: #153b58;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  mat-card-subtitle {
+    margin-top: 5px;
+    color: #6a7d90;
+  }
+}
+
+.requests-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.state-container {
+  display: flex;
+  min-height: 330px;
+  padding: 48px 24px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+
+  > mat-icon {
+    width: 58px;
+    height: 58px;
+    margin-bottom: 14px;
+    color: #00779b;
+    font-size: 58px;
+  }
+
+  h3 {
+    margin: 0;
+    color: #003b64;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.4rem;
+  }
+
+  p {
+    max-width: 480px;
+    margin: 10px 0 22px;
+    color: #65778a;
+    line-height: 1.6;
+  }
+
+  &.error-state > mat-icon {
+    color: #b42318;
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.requests-table {
+  width: 100%;
+  min-width: 900px;
+  background: transparent;
+
+  th {
+    height: 56px;
+    color: #526b82;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  td {
+    min-height: 70px;
+    color: #173953;
+  }
+
+  tr.mat-mdc-row {
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background: #f6fafc;
+    }
+  }
+}
+
+.support-type {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+
+  mat-icon {
+    color: #00779b;
+  }
+}
+
+.amount {
+  color: #004d75;
+  font-size: 0.95rem;
+}
+
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  strong {
+    color: #173953;
+    font-size: 0.88rem;
+  }
+
+  span {
+    color: #77889a;
+    font-size: 0.78rem;
+  }
+}
+
+mat-chip {
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  mat-icon {
+    font-size: 18px;
+  }
+
+  &.estado-pendiente {
+    --mdc-chip-elevated-container-color: #fff0c9;
+    --mdc-chip-label-text-color: #986100;
+  }
+
+  &.estado-revision {
+    --mdc-chip-elevated-container-color: #dff4f8;
+    --mdc-chip-label-text-color: #006d8d;
+  }
+
+  &.estado-aprobada {
+    --mdc-chip-elevated-container-color: #dff5e8;
+    --mdc-chip-label-text-color: #10734a;
+  }
+
+  &.estado-rechazada {
+    --mdc-chip-elevated-container-color: #fde5e2;
+    --mdc-chip-label-text-color: #a62c24;
+  }
+}
+
+mat-paginator {
+  border-top: 1px solid #e1e9f0;
+  background: #f9fbfd;
+}
+
+@media (max-width: 960px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .portal-page {
+    width: min(100% - 28px, 1120px);
+    padding: 36px 0 56px;
+  }
+
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 20px;
+
+    button {
+      align-self: flex-start;
+    }
+  }
+
+  .welcome-card {
+    mat-card-content {
+      align-items: flex-start;
+    }
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card {
+    mat-card-content {
+      min-height: 90px;
+    }
+
+    span {
+      min-height: auto;
+    }
+  }
+
+  .requests-card {
+    mat-card-header {
+      padding: 20px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-card {
+    mat-card-content {
+      flex-direction: column;
+    }
+  }
+
+  .page-header button,
+  .state-container button {
+    width: 100%;
+  }
+}
