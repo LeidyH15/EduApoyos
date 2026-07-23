@@ -7,18 +7,28 @@ using EduApoyos.Domain.Enums;
 using EduApoyos.Infrastructure.Identity;
 using EduApoyos.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace EduApoyos.Infrastructure.Authentication;
 
 public class AuthenticationService : IAuthenticationService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IEstudianteRepository _estudianteRepository;
-    private readonly IUnidadTrabajo _unidadTrabajo;
-    private readonly ApplicationDbContext _context;
-    private readonly IJwtTokenGenerator _tokenGenerator;
+    private readonly UserManager<ApplicationUser>
+        _userManager;
+
+    private readonly SignInManager<ApplicationUser>
+        _signInManager;
+
+    private readonly IEstudianteRepository
+        _estudianteRepository;
+
+    private readonly IUnidadTrabajo
+        _unidadTrabajo;
+
+    private readonly ApplicationDbContext
+        _context;
+
+    private readonly IJwtTokenGenerator
+        _tokenGenerator;
 
     public AuthenticationService(
         UserManager<ApplicationUser> userManager,
@@ -42,10 +52,13 @@ public class AuthenticationService : IAuthenticationService
             CancellationToken cancellationToken = default)
     {
         var email = request.Email.Trim();
-        var numeroDocumento = request.NumeroDocumento.Trim();
+
+        var numeroDocumento =
+            request.NumeroDocumento.Trim();
 
         var usuarioExistente =
-            await _userManager.FindByEmailAsync(email);
+            await _userManager.FindByEmailAsync(
+                email);
 
         if (usuarioExistente is not null)
         {
@@ -54,9 +67,11 @@ public class AuthenticationService : IAuthenticationService
         }
 
         var documentoExiste =
-            await _estudianteRepository.ExisteDocumentoAsync(
-                numeroDocumento,
-                cancellationToken: cancellationToken);
+            await _estudianteRepository
+                .ExisteDocumentoAsync(
+                    numeroDocumento,
+                    cancellationToken:
+                        cancellationToken);
 
         if (documentoExiste)
         {
@@ -65,8 +80,9 @@ public class AuthenticationService : IAuthenticationService
         }
 
         await using var transaction =
-            await _context.Database.BeginTransactionAsync(
-                cancellationToken);
+            await _context.Database
+                .BeginTransactionAsync(
+                    cancellationToken);
 
         try
         {
@@ -75,7 +91,8 @@ public class AuthenticationService : IAuthenticationService
                 Id = Guid.NewGuid(),
                 UserName = email,
                 Email = email,
-                NombreCompleto = request.NombreCompleto.Trim(),
+                NombreCompleto =
+                    request.NombreCompleto.Trim(),
                 FechaRegistro = DateTime.UtcNow
             };
 
@@ -89,12 +106,15 @@ public class AuthenticationService : IAuthenticationService
                 var errores = string.Join(
                     " ",
                     resultadoCreacion.Errors.Select(
-                        error => error.Description));
+                        error =>
+                            error.Description));
 
-                throw new ConflictoException(errores);
+                throw new ConflictoException(
+                    errores);
             }
 
-            var rol = RolUsuario.Estudiante.ToString();
+            var rol =
+                RolUsuario.Estudiante.ToString();
 
             var resultadoRol =
                 await _userManager.AddToRoleAsync(
@@ -106,7 +126,8 @@ public class AuthenticationService : IAuthenticationService
                 var errores = string.Join(
                     " ",
                     resultadoRol.Errors.Select(
-                        error => error.Description));
+                        error =>
+                            error.Description));
 
                 throw new InvalidOperationException(
                     $"No se pudo asignar el rol: {errores}");
@@ -119,19 +140,22 @@ public class AuthenticationService : IAuthenticationService
                 request.ProgramaAcademico,
                 request.Semestre);
 
-            await _estudianteRepository.AgregarAsync(
-                estudiante,
-                cancellationToken);
+            await _estudianteRepository
+                .AgregarAsync(
+                    estudiante,
+                    cancellationToken);
 
-            await _unidadTrabajo.GuardarCambiosAsync(
-                cancellationToken);
+            await _unidadTrabajo
+                .GuardarCambiosAsync(
+                    cancellationToken);
 
             await transaction.CommitAsync(
                 cancellationToken);
 
             return CrearRespuesta(
                 usuario,
-                [rol]);
+                [rol],
+                estudiante.Id);
         }
         catch
         {
@@ -142,12 +166,14 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
-    public async Task<AutenticacionResponse> LoginAsync(
-        LoginRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<AutenticacionResponse>
+        LoginAsync(
+            LoginRequest request,
+            CancellationToken cancellationToken = default)
     {
-        var usuario = await _userManager.FindByEmailAsync(
-            request.Email.Trim());
+        var usuario =
+            await _userManager.FindByEmailAsync(
+                request.Email.Trim());
 
         if (usuario is null)
         {
@@ -155,11 +181,12 @@ public class AuthenticationService : IAuthenticationService
                 "El correo o la contraseña son incorrectos.");
         }
 
-        var resultado = await _signInManager
-            .CheckPasswordSignInAsync(
-                usuario,
-                request.Password,
-                lockoutOnFailure: true);
+        var resultado =
+            await _signInManager
+                .CheckPasswordSignInAsync(
+                    usuario,
+                    request.Password,
+                    lockoutOnFailure: true);
 
         if (!resultado.Succeeded)
         {
@@ -167,30 +194,64 @@ public class AuthenticationService : IAuthenticationService
                 "El correo o la contraseña son incorrectos.");
         }
 
-        var roles = await _userManager.GetRolesAsync(
-            usuario);
+        var roles =
+            await _userManager.GetRolesAsync(
+                usuario);
+
+        Guid? estudianteId = null;
+
+        if (
+            roles.Contains(
+                RolUsuario.Estudiante.ToString(),
+                StringComparer.OrdinalIgnoreCase)
+        )
+        {
+            var estudiante =
+                await _estudianteRepository
+                    .ObtenerPorUsuarioIdAsync(
+                        usuario.Id,
+                        cancellationToken);
+
+            if (estudiante is null)
+            {
+                throw new InvalidOperationException(
+                    "El usuario estudiante no tiene un perfil académico asociado.");
+            }
+
+            estudianteId = estudiante.Id;
+        }
 
         return CrearRespuesta(
             usuario,
-            roles);
+            roles,
+            estudianteId);
     }
 
     private AutenticacionResponse CrearRespuesta(
         ApplicationUser usuario,
-        IEnumerable<string> roles)
+        IEnumerable<string> roles,
+        Guid? estudianteId)
     {
-        var listaRoles = roles.ToList();
+        var listaRoles =
+            roles.ToList();
 
-        var token = _tokenGenerator.Generar(
-            usuario,
-            listaRoles);
+        var token =
+            _tokenGenerator.Generar(
+                usuario,
+                listaRoles);
 
         return new AutenticacionResponse
         {
             UsuarioId = usuario.Id,
-            NombreCompleto = usuario.NombreCompleto,
-            Email = usuario.Email ?? string.Empty,
-            Rol = listaRoles.FirstOrDefault() ?? string.Empty,
+            EstudianteId = estudianteId,
+            NombreCompleto =
+                usuario.NombreCompleto,
+            Email =
+                usuario.Email ??
+                string.Empty,
+            Rol =
+                listaRoles.FirstOrDefault() ??
+                string.Empty,
             Token = token.Token,
             Expiracion = token.Expiracion
         };

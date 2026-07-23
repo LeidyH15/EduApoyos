@@ -54,9 +54,44 @@ public class SolicitudFlowTests
             registroResponse.IsSuccessStatusCode,
             $"Falló el registro: {errorRegistro}");
 
-        var tokenEstudiante =
-            await ObtenerTokenAsync(
+        var registroJson =
+            await LeerJsonAsync(
                 registroResponse);
+
+        var usuarioId =
+            registroJson
+                .GetProperty("usuarioId")
+                .GetGuid();
+
+        var estudianteIdSesion =
+            registroJson
+                .GetProperty("estudianteId")
+                .GetGuid();
+
+        Assert.NotEqual(
+            Guid.Empty,
+            usuarioId);
+
+        Assert.NotEqual(
+            Guid.Empty,
+            estudianteIdSesion);
+
+        Assert.NotEqual(
+            usuarioId,
+            estudianteIdSesion);
+
+        Assert.Equal(
+            "Estudiante",
+            registroJson
+                .GetProperty("rol")
+                .GetString());
+
+        var tokenEstudiante =
+            registroJson
+                .GetProperty("token")
+                .GetString()
+            ?? throw new InvalidOperationException(
+                "La respuesta no contiene un token.");
 
         var crearSolicitud = new
         {
@@ -90,10 +125,14 @@ public class SolicitudFlowTests
                 .GetProperty("id")
                 .GetGuid();
 
-        var estudianteId =
+        var estudianteIdSolicitud =
             solicitudJson
                 .GetProperty("estudianteId")
                 .GetGuid();
+
+        Assert.Equal(
+            estudianteIdSesion,
+            estudianteIdSolicitud);
 
         Assert.Equal(
             1,
@@ -104,7 +143,7 @@ public class SolicitudFlowTests
         using var portalRequest =
             CrearRequestAutorizado(
                 HttpMethod.Get,
-                $"/api/estudiantes/{estudianteId}/solicitudes",
+                $"/api/estudiantes/{estudianteIdSolicitud}/solicitudes",
                 tokenEstudiante);
 
         var portalResponse =
@@ -340,7 +379,7 @@ public class SolicitudFlowTests
     }
 
     private async Task<string> RegistrarEstudianteAsync(
-    string nombreCompleto)
+        string nombreCompleto)
     {
         var identificador =
             Guid.NewGuid().ToString("N");
@@ -373,8 +412,21 @@ public class SolicitudFlowTests
             response.IsSuccessStatusCode,
             $"Falló el registro del estudiante: {contenido}");
 
-        return await ObtenerTokenAsync(
-            response);
+        var respuestaJson =
+            await LeerJsonAsync(
+                response);
+
+        Assert.NotEqual(
+            Guid.Empty,
+            respuestaJson
+                .GetProperty("estudianteId")
+                .GetGuid());
+
+        return respuestaJson
+            .GetProperty("token")
+            .GetString()
+            ?? throw new InvalidOperationException(
+                "La respuesta no contiene un token.");
     }
 
     private async Task<string> LoginAsesorAsync()
@@ -394,8 +446,21 @@ public class SolicitudFlowTests
 
         response.EnsureSuccessStatusCode();
 
-        return await ObtenerTokenAsync(
-            response);
+        var respuestaJson =
+            await LeerJsonAsync(
+                response);
+
+        Assert.Equal(
+            JsonValueKind.Null,
+            respuestaJson
+                .GetProperty("estudianteId")
+                .ValueKind);
+
+        return respuestaJson
+            .GetProperty("token")
+            .GetString()
+            ?? throw new InvalidOperationException(
+                "La respuesta no contiene un token.");
     }
 
     private static async Task<string> ObtenerTokenAsync(

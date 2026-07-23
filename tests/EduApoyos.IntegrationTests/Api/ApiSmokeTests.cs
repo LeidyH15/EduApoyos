@@ -129,6 +129,12 @@ public class ApiSmokeTests
         Assert.Equal(
             "asesor.tests@eduapoyos.local",
             raiz.GetProperty("email").GetString());
+
+        Assert.Equal(
+    JsonValueKind.Null,
+    raiz.GetProperty(
+        "estudianteId")
+    .ValueKind);
     }
 
     [Fact]
