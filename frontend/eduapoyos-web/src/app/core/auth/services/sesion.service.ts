@@ -2,6 +2,7 @@ import {
   Injectable,
   signal
 } from '@angular/core';
+
 import {
   AutenticacionResponse,
   RolUsuario
@@ -30,22 +31,32 @@ export class SesionService {
       JSON.stringify(autenticacion)
     );
 
-    this.usuarioSignal.set(autenticacion);
+    this.usuarioSignal.set(
+      autenticacion
+    );
   }
 
   cerrarSesion(): void {
-    sessionStorage.removeItem(this.storageKey);
+    sessionStorage.removeItem(
+      this.storageKey
+    );
+
     this.usuarioSignal.set(null);
   }
 
   obtenerToken(): string | null {
-    const usuario = this.usuarioSignal();
+    const usuario =
+      this.usuarioSignal();
 
     if (!usuario) {
       return null;
     }
 
-    if (this.tokenEstaExpirado(usuario.expiracion)) {
+    if (
+      this.tokenEstaExpirado(
+        usuario.expiracion
+      )
+    ) {
       this.cerrarSesion();
       return null;
     }
@@ -54,14 +65,33 @@ export class SesionService {
   }
 
   obtenerRol(): RolUsuario | null {
-    return this.usuarioSignal()?.rol ?? null;
+    return (
+      this.usuarioSignal()?.rol ??
+      null
+    );
+  }
+
+  obtenerEstudianteId(): string | null {
+    const usuario =
+      this.usuarioSignal();
+
+    if (
+      !usuario ||
+      usuario.rol !== 'Estudiante'
+    ) {
+      return null;
+    }
+
+    return usuario.estudianteId ?? null;
   }
 
   estaAutenticado(): boolean {
     return this.obtenerToken() !== null;
   }
 
-  tieneRol(rol: RolUsuario): boolean {
+  tieneRol(
+    rol: RolUsuario
+  ): boolean {
     return (
       this.estaAutenticado() &&
       this.obtenerRol() === rol
@@ -71,7 +101,9 @@ export class SesionService {
   private leerSesion():
     AutenticacionResponse | null {
     const sesion =
-      sessionStorage.getItem(this.storageKey);
+      sessionStorage.getItem(
+        this.storageKey
+      );
 
     if (!sesion) {
       return null;
@@ -98,7 +130,10 @@ export class SesionService {
 
       return autenticacion;
     } catch {
-      sessionStorage.removeItem(this.storageKey);
+      sessionStorage.removeItem(
+        this.storageKey
+      );
+
       return null;
     }
   }
